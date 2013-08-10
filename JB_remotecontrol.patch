@@ -1,0 +1,3842 @@
+diff --git a/device/rockchip/rk30sdk/device.mk b/device/rockchip/rk30sdk/device.mk
+index a2cbac4..e2d687b 100755
+--- a/device/rockchip/rk30sdk/device.mk
++++ b/device/rockchip/rk30sdk/device.mk
+@@ -1,3 +1,4 @@
++# $_FOR_ROCKCHIP_RBOX_$
+ # Copyright (C) 2011 rockchip Limited
+ #
+ # Licensed under the Apache License, Version 2.0 (the "License");
+@@ -127,10 +128,12 @@ PRODUCT_COPY_FILES += $(LOCAL_PATH)/apk/tuzi/libtuzi_core.so:system/lib/libtuzi_
+ #alsa
+ ifeq ($(strip $(BOARD_USES_ALSA_AUDIO)),true)
+ 
++#$_rbox_$_modify_$_begin_$_zhangxueguang_$_20120409_$
+ ifeq ($(strip $(BOARD_CODEC_ITV)),true)
+ PRODUCT_COPY_FILES += \
+         device/rockchip/rk30sdk/asound_itv.conf:system/etc/asound.conf
+ endif
++#$_rbox_$_modify_$_end_$_zhangxueguang_$_20120409_$
+ 
+ $(call inherit-product, external/alsa-lib/copy.mk)
+ 
+@@ -177,8 +180,10 @@ PRODUCT_COPY_FILES += \
+         device/rockchip/$(TARGET_PRODUCT)/media_profiles.xml:system/etc/media_profiles.xml \
+ 	
+ 
++#$_rbox_$_modify_$ begin add by lijiehong for settings configuration
+ PRODUCT_COPY_FILES += \
+         device/rockchip/rk30sdk/settings_disabled_menu_list.xml:system/etc/permissions/settings_disabled_menu_list.xml
++#$_rbox_$_modify_$ end settings configuration
+ 
+ # Bluetooth configuration files
+ PRODUCT_COPY_FILES += \
+@@ -384,8 +389,8 @@ PRODUCT_PROPERTY_OVERRIDES += \
+         dalvik.vm.jniopts=warnonly \
+ 	ro.rksdk.version=RK30_ANDROID$(PLATFORM_VERSION)-SDK-v1.00.1015 \
+         sys.hwc.compose_policy=6 \
+-        ro.sf.fakerotation=false \
+-        ro.sf.hwrotation=0 \
++        ro.sf.fakerotation=true \
++        ro.sf.hwrotation=270 \
+ 	ro.rk.MassStorage=false \
+         wifi.interface=wlan0 \
+ 	ro.sf.lcd_density=160 \
+@@ -497,15 +502,18 @@ endif
+ PRODUCT_COPY_FILES += \
+         device/rockchip/$(TARGET_PRODUCT)/whtest.sh:system/bin/whtest.sh
+ 
++#$_rbox_$_modify_$_chenzhi_20120309: add android.hardware.ethernet.xml
+ PRODUCT_COPY_FILES += \
+         frameworks/native/data/etc/android.hardware.ethernet.xml:system/etc/permissions/android.hardware.ethernet.xml
+ 
++#$_rbox_$_modify_$_chenzhi_20120309: add android.software.pppoe.xml
+ PRODUCT_COPY_FILES += \
+         frameworks/native/data/etc/android.software.pppoe.xml:system/etc/permissions/android.software.pppoe.xml
+ 
+ $(call inherit-product, external/wlan_loader/wifi-firmware.mk)
+ 
+ $(call inherit-product, system/bluetooth/brcm_patchram_plus/hcd.mk)
++#$_rbox_$_modify_$_chenzhi_20120309
+ $(call inherit-product, external/rp-pppoe/pppoe-copy.mk)
+ 
+ $(call inherit-product, device/rockchip/rk30_common/common.mk)
+diff --git a/frameworks/base/Android.mk b/frameworks/base/Android.mk
+index 0c9fc78..1beebd9 100755
+--- a/frameworks/base/Android.mk
++++ b/frameworks/base/Android.mk
+@@ -1,3 +1,4 @@
++#$_FOR_ROCKCHIP_RBOX_$
+ #
+ # Copyright (C) 2008 The Android Open Source Project
+ #
+@@ -28,6 +29,8 @@ framework_res_source_path := APPS/framework-res_intermediates/src
+ 
+ # the library
+ # ============================================================
++##$_rbox_$_modify_$_chenzhi_20120809: add framework2
++##$_rbox_$_modify_$_begin
+ #
+ # These will be included in framework2 to avoid issues with the limit
+ # on the number of classes/dex
+@@ -40,15 +43,19 @@ SECONDARY_FRAMEWORKS_SUBDIRS := \
+         media/java/android/media/audiofx \
+         media/mca/effect/java/android/media/effect \
+         media/mca/effect/java/android/media/effect/effects
++##$_rbox_$_modify_$_end
+ 
+ include $(CLEAR_VARS)
+ 
+ # FRAMEWORKS_BASE_SUBDIRS comes from build/core/pathmap.mk
+ LOCAL_SRC_FILES := $(call find-other-java-files,$(FRAMEWORKS_BASE_SUBDIRS))
+ 
++##$_rbox_$_modify_$_chenzhi_20120809: add framework2
++##$_rbox_$_modify_$_begin
+ SECONDARY_SRC_FILES := $(call find-other-java-files,$(SECONDARY_FRAMEWORKS_SUBDIRS))
+ 
+ LOCAL_SRC_FILES := $(filter-out $(SECONDARY_SRC_FILES),$(LOCAL_SRC_FILES))
++##$_rbox_$_modify_$_end
+ 
+ # EventLogTags files.
+ LOCAL_SRC_FILES += \
+@@ -75,7 +82,12 @@ LOCAL_SRC_FILES := $(filter-out \
+ ## across process boundaries.
+ ##
+ ## READ ME: ########################################################
++## $_rbox_$_modify_$ Add by zheng yang 2012-02-20, for add DisplayDeviceManagementService
++#$_rbox_$_modify_$_chenzhi_20120309: add IEthernetManager.aidl
++#$_rbox_$_modify_$_chenzhi_20120309: add IPppoeManager.aidl
+ LOCAL_SRC_FILES += \
++	core/java/android/hardware/ISensor.aidl \
++	core/java/android/hardware/ISensorManager.aidl \
+ 	core/java/android/accessibilityservice/IAccessibilityServiceConnection.aidl \
+ 	core/java/android/accessibilityservice/IAccessibilityServiceClient.aidl \
+ 	core/java/android/accounts/IAccountManager.aidl \
+@@ -273,12 +285,16 @@ $(full_classes_compiled_jar): $(framework_res_R_stamp)
+ $(LOCAL_INSTALLED_MODULE): | $(dir $(LOCAL_INSTALLED_MODULE))framework-res.apk
+ 
+ framework_built := $(call java-lib-deps,framework)
++##$_rbox_$_modify_$_chenzhi_20120809: add framework2
++##$_rbox_$_modify_$_begin
+ framework_built += $(call java-lib-deps,framework2)
++##$_rbox_$_modify_$_end
+ 
+ # AIDL files to be preprocessed and included in the SDK,
+ # relative to the root of the build tree.
+ # ============================================================
+ aidl_files := \
++	frameworks/base/core/java/android/hardware/SensorParcel.aidl \
+ 	frameworks/base/core/java/android/accounts/IAccountManager.aidl \
+ 	frameworks/base/core/java/android/accounts/IAccountManagerResponse.aidl \
+ 	frameworks/base/core/java/android/accounts/IAccountAuthenticator.aidl \
+@@ -407,6 +423,7 @@ framework_docs_LOCAL_INTERMEDIATE_SOURCES := \
+ 			$(framework_res_source_path)/android/Manifest.java \
+ 			$(framework_res_source_path)/com/android/internal/R.java
+ 
++##$_rbox_$_modify_$_chenzhi_20120809: add framework2
+ framework_docs_LOCAL_JAVA_LIBRARIES := \
+ 			bouncycastle \
+ 			core \
+@@ -688,6 +705,7 @@ include $(CLEAR_VARS)
+ LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
+ LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+ 
++##$_rbox_$_modify_$_chenzhi_20120809: add framework2
+ LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES) framework framework2
+ LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
+ LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
+@@ -741,6 +759,8 @@ LOCAL_DX_FLAGS := --core-library
+ 
+ include $(BUILD_JAVA_LIBRARY)
+ 
++##$_rbox_$_modify_$_chenzhi_20120809: add framework2
++##$_rbox_$_modify_$_begin
+ include $(CLEAR_VARS)
+ 
+ # FRAMEWORKS_BASE_SUBDIRS comes from build/core/pathmap.mk
+@@ -761,6 +781,7 @@ LOCAL_NO_EMMA_COMPILE := true
+ LOCAL_DX_FLAGS := --core-library
+ 
+ include $(BUILD_JAVA_LIBRARY)
++##$_rbox_$_modify_$_end
+ 
+ # Include subdirectory makefiles
+ # ============================================================
+diff --git a/frameworks/base/api/current.txt b/frameworks/base/api/current.txt
+index c0bf28b..0d8776d 100755
+--- a/frameworks/base/api/current.txt
++++ b/frameworks/base/api/current.txt
+@@ -9812,6 +9812,16 @@ package android.hardware {
+     method public float getZ();
+   }
+ 
++  public abstract interface ISensor implements android.os.IInterface {
++  }
++
++  public static abstract class ISensor.Stub extends android.os.Binder implements android.hardware.ISensor {
++    ctor public ISensor.Stub();
++    method public android.os.IBinder asBinder();
++    method public static android.hardware.ISensor asInterface(android.os.IBinder);
++    method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;
++  }
++
+   public class Sensor {
+     method public float getMaximumRange();
+     method public int getMinDelay();
+@@ -9933,6 +9943,17 @@ package android.hardware {
+     field public static final float STANDARD_GRAVITY = 9.80665f;
+   }
+ 
++  public class SensorParcel implements android.os.Parcelable {
++    ctor public SensorParcel();
++    method public int describeContents();
++    method public void writeToParcel(android.os.Parcel, int);
++    field public static final android.os.Parcelable.Creator CREATOR;
++    field public int accuracy;
++    field public int sensorType;
++    field public long timestamp;
++    field public float[] values;
++  }
++
+ }
+ 
+ package android.hardware.input {
+diff --git a/frameworks/base/core/java/android/hardware/ISensor.aidl b/frameworks/base/core/java/android/hardware/ISensor.aidl
+new file mode 100755
+index 0000000..57bb591
+--- /dev/null
++++ b/frameworks/base/core/java/android/hardware/ISensor.aidl
+@@ -0,0 +1,20 @@
++/*******************************************************************
++* Company:     Fuzhou Rockchip Electronics Co., Ltd
++* Filename:    ISensor
++* Description:   
++* @author:     fxw@rock-chips.com
++* Create at:   2011-12-17 下午01:03:04  
++* 
++* Modification History:  
++* Date         Author      Version     Description  
++* ------------------------------------------------------------------  
++* 2011-12-17      xwf         1.0         create
++*******************************************************************/ 
++
++package android.hardware;
++
++interface ISensor {
++
++
++
++}
+\ No newline at end of file
+diff --git a/frameworks/base/core/java/android/hardware/ISensorManager.aidl b/frameworks/base/core/java/android/hardware/ISensorManager.aidl
+new file mode 100755
+index 0000000..0a69b23
+--- /dev/null
++++ b/frameworks/base/core/java/android/hardware/ISensorManager.aidl
+@@ -0,0 +1,33 @@
++/*******************************************************************
++* Company:     Fuzhou Rockchip Electronics Co., Ltd
++* Filename:    ISensorManager
++* Description:   
++* @author:     fxw@rock-chips.com
++* Create at:   2011-12-17 下午01:03:04  
++* 
++* Modification History:  
++* Date         Author      Version     Description  
++* ------------------------------------------------------------------  
++* 2011-12-17      xwf         1.0         create
++*******************************************************************/
++
++package android.hardware;
++
++import android.hardware.SensorParcel;
++
++/**
++ * System private interface to the remote sensor manager.
++ *
++ * {@hide}
++ */
++interface ISensorManager {
++
++    boolean injectSensorEvent(in float[] values, int accuracy, long timestamp, int sensorType);
++    boolean setRemoteSensorEnabled(boolean enable);
++    
++    boolean getRemoteSensorEnabled();
++    SensorParcel obtainSensorEvent(int queue);
++    int createSensorQueue();
++    void destroySensorQueue(int queue);
++    
++}
+\ No newline at end of file
+diff --git a/frameworks/base/core/java/android/hardware/SensorParcel.aidl b/frameworks/base/core/java/android/hardware/SensorParcel.aidl
+new file mode 100755
+index 0000000..e715071
+--- /dev/null
++++ b/frameworks/base/core/java/android/hardware/SensorParcel.aidl
+@@ -0,0 +1,20 @@
++/* //device/java/android/android.view.KeyEvent.aidl
++**
++** Copyright 2007, The Android Open Source Project
++**
++** Licensed under the Apache License, Version 2.0 (the "License"); 
++** you may not use this file except in compliance with the License. 
++** You may obtain a copy of the License at 
++**
++**     http://www.apache.org/licenses/LICENSE-2.0 
++**
++** Unless required by applicable law or agreed to in writing, software 
++** distributed under the License is distributed on an "AS IS" BASIS, 
++** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
++** See the License for the specific language governing permissions and 
++** limitations under the License.
++*/
++
++package android.hardware;
++
++parcelable SensorParcel;
+diff --git a/frameworks/base/core/java/android/hardware/SensorParcel.java b/frameworks/base/core/java/android/hardware/SensorParcel.java
+new file mode 100755
+index 0000000..07add31
+--- /dev/null
++++ b/frameworks/base/core/java/android/hardware/SensorParcel.java
+@@ -0,0 +1,65 @@
++/*******************************************************************
++* Company:     Fuzhou Rockchip Electronics Co., Ltd
++* Filename:    SensorParcel.java  
++* Description:   
++* @author:     fxw@rock-chips.com
++* Create at:   2011-12-17 下午04:01:57  
++* 
++* Modification History:  
++* Date         Author      Version     Description  
++* ------------------------------------------------------------------  
++* 2011-12-17      xwf         1.0         create
++*******************************************************************/   
++
++
++package android.hardware;
++
++
++import android.os.Parcel;
++import android.os.Parcelable;
++
++public class SensorParcel implements Parcelable {
++	
++	public float[] values;
++	public int accuracy;
++	public long timestamp;
++	public int sensorType;
++
++	/** 
++	 * <p>Title: describeContents</p> 
++	 * <p>Description: </p> 
++	 * @return 
++	 * @see android.os.Parcelable#describeContents() 
++	 */
++	@Override
++	public int describeContents() {
++		return 0;
++	}
++
++	@Override
++	public void writeToParcel(Parcel dest, int flags) {
++		dest.writeFloatArray(values);
++		dest.writeInt(accuracy);
++		dest.writeLong(timestamp);
++		dest.writeInt(sensorType);
++	}
++	
++	public static final Parcelable.Creator<SensorParcel> CREATOR = new Creator<SensorParcel>() {
++		@Override
++		public SensorParcel createFromParcel(Parcel source) {
++			SensorParcel sensor = new SensorParcel();
++			float[] values = new float[3];
++			source.readFloatArray(values);
++			sensor.values = values;
++			sensor.accuracy = source.readInt();
++			sensor.timestamp = source.readLong();
++			sensor.sensorType = source.readInt();
++			return sensor;
++		}
++		
++		@Override
++		public SensorParcel[] newArray(int size) {
++			return new SensorParcel[size];
++		}
++	};
++}
+diff --git a/frameworks/base/core/java/android/hardware/SystemSensorManager.java b/frameworks/base/core/java/android/hardware/SystemSensorManager.java
+index 0204e94..d2c92e5 100644
+--- a/frameworks/base/core/java/android/hardware/SystemSensorManager.java
++++ b/frameworks/base/core/java/android/hardware/SystemSensorManager.java
+@@ -20,10 +20,13 @@ import android.os.Looper;
+ import android.os.Process;
+ import android.os.Handler;
+ import android.os.Message;
++import android.os.RemoteException;
++import android.os.ServiceManager;
+ import android.util.Log;
+ import android.util.SparseArray;
+ import android.util.SparseBooleanArray;
+ import android.util.SparseIntArray;
++import android.view.IWindowManager;
+ 
+ import java.util.ArrayList;
+ import java.util.List;
+@@ -55,12 +58,26 @@ public class SystemSensorManager extends SensorManager {
+     final Looper mMainLooper;
+ 
+     /*-----------------------------------------------------------------------*/
+-
++    
++    /**
++     * rk modify remote sensor by cx 201209
++     */
++    private static ISensorManager sSensorManager;
++    public static final int TYPE_VIRTUAL = -2;
++    private static int sRemoteQueue;
++    /**modify end**/
++	
+     static private class SensorThread {
+ 
+         Thread mThread;
+         boolean mSensorsReady;
+-
++        
++        /**
++         * rk modify remote sensor by cx 201209
++         */
++        Thread mRemoteSensorThread;
++        /**modify end**/
++   
+         SensorThread() {
+         }
+ 
+@@ -85,7 +102,29 @@ public class SystemSensorManager extends SensorManager {
+                 }
+             } catch (InterruptedException e) {
+             }
+-            return mThread == null ? false : true;
++                      
++            /**
++             * rk modify remote sensor by cx 201209
++             */
++            try {
++                if (mRemoteSensorThread == null) {
++                    mSensorsReady = false;
++                    RemoteSensorThreadRunnable runnable = new RemoteSensorThreadRunnable();
++                    Thread thread = new Thread(runnable, "RemoteSensor"+SensorThread.class.getName());
++                    thread.start();
++                    synchronized (runnable) {
++                        while (mSensorsReady == false) {
++                            runnable.wait();
++                        }
++                    }
++                    mRemoteSensorThread = thread;
++                }
++            } catch (InterruptedException e) {
++            }
++            
++//            return mThread == null ? false : true;
++            return (mThread == null || mRemoteSensorThread == null)? false : true;
++            /**modify end **/
+         }
+ 
+         private class SensorThreadRunnable implements Runnable {
+@@ -156,6 +195,136 @@ public class SystemSensorManager extends SensorManager {
+                 //Log.d(TAG, "exiting main sensor thread");
+             }
+         }
++		       
++    
++        /**
++         * rk modify remote sensor by cx 201209
++         */
++       private boolean openRemote() {
++               if(sRemoteQueue==0){
++                       try{
++                               sRemoteQueue = sSensorManager.createSensorQueue();
++                       }catch(RemoteException re){
++                               
++                       }
++               }
++               return true;
++       }
++
++       private void closeRemote(){
++               if(sRemoteQueue!=0){
++                       try{
++                               sSensorManager.destroySensorQueue(sRemoteQueue);
++                               sRemoteQueue = 0;
++                       }catch(RemoteException re){
++                                       
++                       }
++               }
++       }
++
++       private boolean isRemoteSensorEnabled(){
++               try{
++                       if(sSensorManager!=null)
++                               return sSensorManager.getRemoteSensorEnabled();
++                       }catch(RemoteException re){
++                               
++                       }
++                       return false;     
++       }
++
++       private void sleep(){
++               try{
++                       Thread.sleep(1000);
++               }catch(Exception re){
++                       
++               }
++       }
++    
++        private class RemoteSensorThreadRunnable implements Runnable {
++               RemoteSensorThreadRunnable() {
++            }
++
++            public void run() {
++                //Log.d(TAG, "entering main sensor thread");
++                float[] values = new float[3];
++                final int[] status = new int[1];
++                final long timestamp[] = new long[1];
++                Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
++
++                synchronized (this) {
++                    // we've open the driver, we're ready to open the sensors
++                    mSensorsReady = true;
++                    this.notify();
++                }
++
++                while (true) {
++                    // wait for an event
++//                     Log.d("sensorManager","remote sensor");
++//                     Log.d("sensorManager","sensor listeners:"+sListeners.size());
++                       int sensor = 0;
++                               if(isRemoteSensorEnabled()){
++//                                     Log.d("SensorManager","RemoteSensorEnabled");
++                                       openRemote();
++                                       SensorParcel sensorParcel = null;
++                                       try{
++                                             sensorParcel = sSensorManager.obtainSensorEvent(sRemoteQueue);
++                                      }catch(RemoteException re){
++                                      }  
++                                       if(sensorParcel!=null){
++                                          values = sensorParcel.values;
++                                          status[0] = sensorParcel.accuracy;
++                                          timestamp[0] = sensorParcel.timestamp;
++//                                        Log.d("sensorManager","sensor values:"+values[0]+","+values[1]+","+values[2]);
++                                   }else{
++                                          sleep();
++                                          if(!sListeners.isEmpty()){
++                                                  continue;
++                                          }
++                                   }
++                               }else{
++                                       sleep();
++                                       if(!sListeners.isEmpty()){
++                                               continue;
++                                       }
++                               }
++                               
++                    int accuracy = status[0];
++                    synchronized (sListeners) {
++                        if (sensor == -1 || sListeners.isEmpty()) {
++                            // we lost the connection to the event stream. this happens
++                            // when the last listener is removed or if there is an error
++                            if (sensor == -1 && !sListeners.isEmpty()) {
++                                // log a warning in case of abnormal termination
++                                Log.e(TAG, "_sensors_data_poll() failed, we bail out: sensors=" + sensor);
++                            }
++                            // we have no more listeners or polling failed, terminate the thread
++                            sensors_destroy_queue(sQueue);
++                            sQueue = 0;
++                                       closeRemote();
++                            mRemoteSensorThread = null;
++                            break;
++                        }
++                        final Sensor sensorObject = sHandleToSensor.get(sensor);
++                        if (sensorObject != null) {
++                            // report the sensor event to all listeners that
++                            // care about it.
++                            final int size = sListeners.size();
++                            for (int i=0 ; i<size ; i++) {
++                                ListenerDelegate listener = sListeners.get(i);
++                                if (listener.hasSensor(sensorObject)) {
++                                    // this is asynchronous (okay to call
++                                    // with sListeners lock held).
++                                    listener.onSensorChangedLocked(sensorObject,
++                                            values, timestamp, accuracy);
++                                }
++                            }
++                        }
++                    }
++                }
++                //Log.d(TAG, "exiting main sensor thread");
++            }
++        }
++        /**modify end**/
+     }
+ 
+     /*-----------------------------------------------------------------------*/
+@@ -256,7 +425,22 @@ public class SystemSensorManager extends SensorManager {
+                 sSensorModuleInitialized = true;
+ 
+                 nativeClassInit();
+-
++                    
++                /**
++                 * rk modify remote sensor by cx 201209
++                 */
++				IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
++                        ServiceManager.getService("window"));
++				if (sWindowManager != null) {
++					try {
++                       sSensorManager = sWindowManager.getRemoteSensorManager();
++					   Log.d("LegacySensorManager","aidl getSensorManager:"+sSensorManager);
++                    } catch (RemoteException e) {
++						// TODO: handle exception
++					}
++				}
++                /**modify end**/
++  
+                 // initialize the sensor list
+                 sensors_module_init();
+                 final ArrayList<Sensor> fullList = sFullSensorsList;
+@@ -291,7 +475,16 @@ public class SystemSensorManager extends SensorManager {
+             if (i.hasSensor(sensor)) {
+                 String name = sensor.getName();
+                 int handle = sensor.getHandle();
+-                result = sensors_enable_sensor(sQueue, name, handle, delay);
++                /**
++                 * rk modify remote sensor by cx 201209
++                 */
++//                result = sensors_enable_sensor(sQueue, name, handle, delay);
++                if (sensor.getType() == Sensor.TYPE_ACCELEROMETER && sSensorManager != null){
++                       result = true;
++                } else {
++                       result = sensors_enable_sensor(sQueue, name, handle, delay);
++                }
++                /**modify end**/
+                 break;
+             }
+         }
+diff --git a/frameworks/base/core/java/android/view/IWindowManager.aidl b/frameworks/base/core/java/android/view/IWindowManager.aidl
+index 6fffecf..68d9124 100644
+--- a/frameworks/base/core/java/android/view/IWindowManager.aidl
++++ b/frameworks/base/core/java/android/view/IWindowManager.aidl
+@@ -1,3 +1,4 @@
++/*$_FOR_ROCKCHIP_RBOX_$*/
+ /*
+ ** Copyright 2006, The Android Open Source Project
+ **
+@@ -23,6 +24,7 @@ import android.content.res.CompatibilityInfo;
+ import android.content.res.Configuration;
+ import android.graphics.Bitmap;
+ import android.graphics.Point;
++import android.hardware.ISensorManager;
+ import android.os.IRemoteCallback;
+ import android.view.IApplicationToken;
+ import android.view.IOnKeyguardExitResult;
+@@ -66,10 +68,21 @@ interface IWindowManager
+     // Is the device configured to have a full system bar for larger screens?
+     boolean hasSystemNavBar();
+ 
++    /*$_rbox_$_modify_$_zhangwen_20120808: Make a interface in WindowManagerService.java for other apps  */
++	//$_rbox_$_modify_$_begin
+     void dispatchMouse(float x,float y,int w,int h);
++    //$_rbox_$_modify_$_end
+     
++    /*$_rbox_$_modify_$_zhangwen_20120808: Make a interface in WindowManagerService.java for other apps by coordinate */
++	//$_rbox_$_modify_$_begin
+     void dispatchMousebyCd(float x,float y);
+-  
++    //$_rbox_$_modify_$_end
++    
++    /*$_rbox_$_modify_$_cx_20120928*/
++	//$_rbox_$_modify_$_begin
++    ISensorManager getRemoteSensorManager();
++    //$_rbox_$_modify_$_end
++    
+     // These can only be called when holding the MANAGE_APP_TOKENS permission.
+     void pauseKeyDispatching(IBinder token);
+     void resumeKeyDispatching(IBinder token);
+diff --git a/frameworks/base/services/java/com/android/server/pm/PackageManagerService.java b/frameworks/base/services/java/com/android/server/pm/PackageManagerService.java
+index f67a6f1..7998b7b 100755
+--- a/frameworks/base/services/java/com/android/server/pm/PackageManagerService.java
++++ b/frameworks/base/services/java/com/android/server/pm/PackageManagerService.java
+@@ -878,6 +878,7 @@ public class PackageManagerService extends IPackageManager.Stub {
+         mSettings.addSharedUserLPw("android.uid.system",
+                 Process.SYSTEM_UID, ApplicationInfo.FLAG_SYSTEM);
+         mSettings.addSharedUserLPw("android.uid.phone", RADIO_UID, ApplicationInfo.FLAG_SYSTEM);
++	    mSettings.addSharedUserLPw("android.uid.media",    Process.MEDIA_UID, ApplicationInfo.FLAG_SYSTEM);
+         mSettings.addSharedUserLPw("android.uid.log", LOG_UID, ApplicationInfo.FLAG_SYSTEM);
+         mSettings.addSharedUserLPw("android.uid.nfc", NFC_UID, ApplicationInfo.FLAG_SYSTEM);
+ 
+diff --git a/frameworks/base/services/java/com/android/server/wm/WindowManagerService.java b/frameworks/base/services/java/com/android/server/wm/WindowManagerService.java
+index e911f2b..7c8495d 100755
+--- a/frameworks/base/services/java/com/android/server/wm/WindowManagerService.java
++++ b/frameworks/base/services/java/com/android/server/wm/WindowManagerService.java
+@@ -1,3 +1,4 @@
++/* $_FOR_ROCKCHIP_RBOX_$ */
+ /*
+  * Copyright (C) 2007 The Android Open Source Project
+  *
+@@ -49,6 +50,8 @@ import com.android.server.input.InputFilter;
+ import com.android.server.input.InputManagerService;
+ import com.android.server.pm.ShutdownThread;
+ 
++import com.android.server.wm.remotecontrol.*;
++
+ import android.Manifest;
+ import android.app.ActivityManagerNative;
+ import android.app.ActivityOptions;
+@@ -70,6 +73,7 @@ import android.graphics.PixelFormat;
+ import android.graphics.Point;
+ import android.graphics.Rect;
+ import android.graphics.Region;
++import android.hardware.ISensorManager;
+ import android.os.BatteryStats;
+ import android.os.Binder;
+ import android.os.Bundle;
+@@ -236,7 +240,10 @@ public class WindowManagerService extends IWindowManager.Stub
+      * this is 10 seconds.
+      */
+     static final int MAX_ANIMATION_DURATION = 10*1000;
+-
++/* $_rbox_$_modify_$_zhangwen_20121114: add for screen sharing  */
++//$_rbox_$_modify_$_begin
++	private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
++//$_rbox_$_modify_$ end
+     /** Amount of time (in milliseconds) to animate the dim surface from one
+      * value to another, when no window animation is driving it.
+      */
+@@ -629,6 +636,7 @@ public class WindowManagerService extends IWindowManager.Stub
+     float mAnimatorDurationScale = 1.0f;
+ 
+     final InputManagerService mInputManager;
++	final RemoteControlManager RCManager;
+ 
+     // Who is holding the screen on.
+     Session mHoldingScreenOn;
+@@ -955,6 +963,10 @@ public class WindowManagerService extends IWindowManager.Stub
+         Surface.openTransaction();
+         createWatermark();
+         Surface.closeTransaction();
++		
++		//remote control
++        RCManager = new RemoteControlManager(context, this);
++        RCManager.startListener();
+     }
+ 
+     public InputManagerService getInputManagerService() {
+@@ -5807,7 +5819,10 @@ public class WindowManagerService extends IWindowManager.Stub
+              rotation = Surface.ROTATION_90;
+         }
+ 
+-        rotation = SystemProperties.getInt("ro.sf.hwrotation", 0);
++/* $_rbox_$_modify_$ Add by zheng yang 20120220, force android rotation according to ro.sf.hwrotation */
++//        rotation = Surface.ROTATION_90; //SystemProperties.getInt("ro.sf.hwrotation", 0);
++	rotation = 1;
++/* $_rbox_$_modify_$ end */
+ 
+         if (mRotation == rotation && mAltOrientation == altOrientation) {
+             // No change.
+@@ -6667,7 +6682,9 @@ public class WindowManagerService extends IWindowManager.Stub
+             }
+ 
+             // Determine whether a hard keyboard is available and enabled.
++//$_rbox_$_modify_$ change by lijiehong to disable hardKeyboard detection
+             boolean hardKeyboardAvailable = false; //config.keyboard != Configuration.KEYBOARD_NOKEYS;
++//$_rbox_$_modify_$ end
+             if (hardKeyboardAvailable != mHardKeyboardAvailable) {
+                 mHardKeyboardAvailable = hardKeyboardAvailable;
+                 mHardKeyboardEnabled = hardKeyboardAvailable;
+@@ -6787,19 +6804,64 @@ public class WindowManagerService extends IWindowManager.Stub
+     
+     final InputMonitor mInputMonitor = new InputMonitor(this);
+     private boolean mEventDispatchingEnabled;
++	/*$_rbox_$_modify_$_zhangwen_20120808: you can call this function to paint mouse pointer */
++	//$_rbox_$_modify_$_begin
+     public void dispatchMouse(float x,float y,int w,int h){
+ 	
+ 		mInputManager.dispatchMouse(x,y,w,h);
+ 
+ 	}
++	//$_rbox_$_modify_$_end
+ 
++	//$_rbox_$_modify_$_zhangwen_20120808: you can call this function to paint mouse pointer by Coordinate
++    //$_rbox_$_modify_$ rather than by Offset
++	//$_rbox_$_modify_$_begin
+     public void dispatchMousebyCd(float x,float y){
+ 	
+ 		mInputManager.dispatchMousebyCd(x,y);
+ 
+ 	}
++	//$_rbox_$_modify_$_end
+ 
+-
++//$_rbox_$_modify_$_cx_20120928:
++    public ISensorManager getRemoteSensorManager(){
++    	if (RCManager != null)
++    		return RCManager.getRemoteSensorManager();
++    	return null;
++    }
++	
++/* $_rbox_$_modify_$_zhangwen_20121114: add for providing interface for mouse & key */
++//$_rbox_$_modify_$_begin
++	   public boolean injectKeyEvent(KeyEvent ev, boolean sync) {
++		   long downTime = ev.getDownTime();
++		   long eventTime = ev.getEventTime();
++		   int action = ev.getAction();
++		   int code = ev.getKeyCode();
++		   int repeatCount = ev.getRepeatCount();
++		   int metaState = ev.getMetaState();
++		   int deviceId = ev.getDeviceId();
++		   int scancode = ev.getScanCode();
++		   int source = ev.getSource();
++		   int flags = ev.getFlags();	   
++		   if (source == InputDevice.SOURCE_UNKNOWN) {
++			   source = InputDevice.SOURCE_KEYBOARD;
++		   }	
++		   if (eventTime == 0) eventTime = SystemClock.uptimeMillis();
++		   if (downTime == 0) downTime = eventTime;
++		   KeyEvent newEvent = new KeyEvent(downTime, eventTime, action, code, repeatCount, metaState,
++				   deviceId, scancode, flags | KeyEvent.FLAG_FROM_SYSTEM, source);
++		   final boolean result = mInputManager.injectInputEvent(newEvent,sync ? 2:1);	  
++		   return result;
++	   }
++       public boolean injectPointerEvent(MotionEvent ev, boolean sync) {  
++		   MotionEvent newEvent = MotionEvent.obtain(ev);
++		   if ((newEvent.getSource() & InputDevice.SOURCE_CLASS_POINTER) == 0) {
++			   newEvent.setSource(InputDevice.SOURCE_TOUCHSCREEN);
++		   }
++		   final boolean result = mInputManager.injectInputEvent(newEvent,sync ? 2:1);
++		   return result;
++	   }
++//$_rbox_$_modify_$ end
+     public void pauseKeyDispatching(IBinder _token) {
+         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
+                 "pauseKeyDispatching()")) {
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/ControlSocket.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/ControlSocket.java
+new file mode 100755
+index 0000000..05c66c4
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/ControlSocket.java
+@@ -0,0 +1,99 @@
++/*******************************************************************
++* Company:     Fuzhou Rockchip Electronics Co., Ltd
++* Filename:    ControlSocket.java  
++* Description:   
++* @author:     fxw@rock-chips.com
++* Create at:   2011-12-19 下午11:01:51  
++* 
++* Modification History:  
++* Date         Author      Version     Description  
++* ------------------------------------------------------------------  
++* 2011-12-19      xwf         1.0         create
++*******************************************************************/   
++
++
++package com.android.server.wm.remotecontrol;
++
++import java.net.DatagramSocket;
++import java.net.InetAddress;
++import android.os.Process;
++import android.util.Log;
++
++
++public class ControlSocket extends UDPSocket implements Runnable {
++
++	public interface RequestListener {
++		public void requestRecieved(UDPPacket packet);
++	}
++	
++	private Thread responseThread = null;
++	private RequestListener mRequestListener;
++	
++	private String ThreadNameHead;
++	
++	public ControlSocket(String NameHead) {
++		ThreadNameHead = NameHead;
++	}
++	
++	public ControlSocket(int port,String NameHead){
++		super(port);
++		ThreadNameHead = NameHead;
++	}
++
++	public ControlSocket(String bindAddr, int port, String NameHead){
++		super(bindAddr, port);
++		ThreadNameHead = NameHead;
++	}
++	
++	/**
++	 * 设置请求响应监听
++	 */
++	public void setRequestListener(RequestListener requestListener){
++		mRequestListener = requestListener;
++	}
++	
++	/** 
++	 * <p>Title: run</p> 
++	 * <p>Description: </p>  
++	 * @see java.lang.Runnable#run() 
++	 */
++	@Override
++	public void run() {
++//		Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
++		Process.setThreadPriority(Process.THREAD_PRIORITY_DISPLAY); //change by cx
++		Process.setCanSelfBackground(false);
++		Thread thisThread = Thread.currentThread();
++		while (responseThread == thisThread) {
++			Thread.yield();
++			final UDPPacket packet = receive();
++			if(packet==null) return;
++			if (mRequestListener != null){
++				mRequestListener.requestRecieved(packet);
++			}
++		}
++	}
++	
++	public void start()	{
++		Log.d(ThreadNameHead,"responseThread start");
++		StringBuffer name = new StringBuffer(ThreadNameHead+"/");
++		DatagramSocket s = getDatagramSocket();
++		InetAddress localAddr = s.getLocalAddress();
++		if (localAddr != null) {
++			name.append(s.getLocalAddress()).append(':');
++			name.append(s.getLocalPort());
++		}
++		Log.d(ThreadNameHead,"thread name:"+name.toString());
++		responseThread = new Thread(this,name.toString());
++		responseThread.start();
++	}
++	
++	public void stop(){
++		close();
++		responseThread = null;
++	}
++	
++	public boolean post(String addr, int port, RemoteControlRequest request){
++		return post(addr, port, request.encodeMessage());
++	}
++	
++}
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/DataTypesConvert.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/DataTypesConvert.java
+new file mode 100755
+index 0000000..1755707
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/DataTypesConvert.java
+@@ -0,0 +1,313 @@
++/*******************************************************************
++* Company:     Fuzhou Rockchip Electronics Co., Ltd
++* Filename:    DataTypesConvert.java  
++* Description:   
++* @author:     fxw@rock-chips.com
++* Create at:   2011-11-17 下午03:33:56  
++* 
++* Modification History:  
++* Date         Author      Version     Description  
++* ------------------------------------------------------------------  
++* 2011-11-17      xwf         1.0         create
++*******************************************************************/   
++
++
++package com.android.server.wm.remotecontrol;
++
++import java.io.ByteArrayInputStream;
++import java.io.IOException;
++import java.io.ObjectInputStream;
++import java.io.StreamCorruptedException;
++import java.nio.ByteBuffer;
++import java.nio.FloatBuffer;
++
++public class DataTypesConvert {
++
++	/**
++	 * 字符数组转换为字符串
++	 * 
++	 * @param bArray
++	 * @return
++	 */
++	public static final String bytesToHexString(byte[] bArray) {
++		StringBuilder sb = new StringBuilder(bArray.length);
++		String sTemp;
++		for (int i = 0; i < bArray.length; i++) {
++			sTemp = Integer.toHexString(0xFF & bArray[i]);
++			if (sTemp.length() < 2)
++				sb.append(0);
++			sb.append(sTemp.toUpperCase());
++		}
++		return sb.toString();
++	}
++
++	/**
++	 * 把字节数值转换为对象
++	 * 
++	 * @param bArray
++	 * @return
++	 * @throws IOException 
++	 * @throws StreamCorruptedException 
++	 */
++	public static final Object bytesToObject(byte[] bytes) throws Exception {
++		ByteArrayInputStream in = new ByteArrayInputStream(bytes);
++		ObjectInputStream oi = new ObjectInputStream(in);
++		Object o = oi.readObject();
++		oi.close();
++		return o;
++	}
++	
++	/**
++	 * 将byte数据转换为int值
++	 * @param data
++	 * @return
++	 */
++	public static int changeByteToInt(byte[] data) {
++		return changeByteToInt(data, 0, data.length-1);
++	}
++	
++	/**
++	 * 将byte数组转换为int
++	 * @param data
++	 * @param start 含
++	 * @param end 不含
++	 * @return
++	 */
++	public static int changeByteToInt(byte[] data, int start, int end) {
++		int result = 0;
++		
++		for (int i = start; i <= end; i++) {
++			result = result << 8;
++			result = result | (data[i] & 0xff);
++			
++		}
++		return result;
++	}
++
++	/**
++	 * sortType 1 表示从高位到低位 2 表示从低位到高位
++	 * 
++	 * @param bArray
++	 * @return
++	 */
++	public static long changeByteToLong(byte[] data, int startNum, int endNum,
++			int sortType) {
++		long TNumber = 0;
++		if (sortType == 1)
++			for (int i = startNum; i <= endNum; i++) {
++				TNumber = TNumber << 8;
++				TNumber = TNumber | (data[i] & 0xff);
++			}
++		else
++			for (int i = endNum; i >= startNum; i--) {
++				TNumber = TNumber << 8;
++				TNumber = TNumber | (data[i] & 0xff);
++			}
++		return TNumber;
++	}
++
++
++	/**
++	 * sortType 1 表示从高位到低位 2 表示从低位到高位
++	 * 
++	 * @param bArray
++	 *            , int...
++	 * @return
++	 */
++	public static long changeBCDByteToLong(byte[] data, int startNum, int endNum,
++			int sortType) {
++		long TNumber = 0;
++		if (sortType == 1)
++			for (int i = startNum; i <= endNum; i++) {
++				byte tmpByte = data[i];
++				int ten = (tmpByte&0xF0)>>>4;
++				int dec = tmpByte& 0x0f;
++				int tmp = ten*10+dec;
++				TNumber = TNumber + tmp
++				* (long) Math.pow(100, (endNum - i));
++			}
++		else
++			for (int i = endNum; i >= startNum; i--) {
++				byte tmpByte = data[i];
++				int ten = (tmpByte&0xF0)>>>4;
++				int dec = tmpByte& 0x0f;
++				int tmp = ten*10+dec;
++				TNumber = TNumber + tmp
++							* (long) Math.pow(100, (i - startNum));
++			}
++		return TNumber;
++	}
++	public static byte[] changeHexStrTobytes(String[] str) {
++		byte[] data = new byte[str.length];
++		for (int i = 0; i < str.length; i++) {
++			String hexStr = "0x" + str[i];
++			data[i] = Byte.decode(hexStr).byteValue();
++			System.out.println(data[i]);
++		}
++		return data;
++	}
++	
++	/**
++	 * 整型转化成对应的位数的byte数组,len表示需要转化的数组长度
++	 * @param num
++	 * @param len
++	 * @return byte[]
++	 */
++	public static byte[] changeIntToByte(int num, int len) {
++		return changeLongToByte(num, len, 1);
++	}
++
++	/**
++	 * 长整型转化成对应的位数的byte数组,len表示需要转化的数组长度
++	 * @param num
++	 * @param len
++	 * @return byte[]
++	 */
++	public static byte[] changeLongToByte(long num, int len) {
++		return changeLongToByte(num, len, 1);
++	}
++
++	/**
++	 * 长整型转化成对应的位数的byte数组,len表示需要转化的数组长度,sortType 1标识高位在前 2 标识低位在前
++	 * 
++	 * @param long , int,sottType
++	 * @return byte[]
++	 */
++	public static byte[] changeLongToByte(long num, int len, int sortType) {
++		byte[] data = new byte[len];
++		if (sortType == 1) {
++			for (int i = 0; i < len; i++) {
++				data[i] = (byte) ((num >> (8*(len-1-i))) & 0xff); 
++			}
++		} else {
++			for (int i = len-1; i >= 0; i--) {
++				data[i] = (byte) ((num >> (8*i)) & 0xff);
++			}
++		}
++		return data;
++	}
++	
++	//float转byte[]
++	public static byte[] floatToByte(float v) {
++        ByteBuffer bb = ByteBuffer.allocate(4);
++        byte[] ret = new byte [4];
++        FloatBuffer fb = bb.asFloatBuffer();
++        fb.put(v);
++        bb.get(ret);
++        return ret;
++	}
++
++	//byte[]转float
++	public static float byteToFloat(byte[] v){
++        ByteBuffer bb = ByteBuffer.wrap(v);
++        FloatBuffer fb = bb.asFloatBuffer();
++        return fb.get();
++	}
++
++	/**
++	 * 检验校验和，判断数据传送是否有误
++	 * @param b
++	 * @return
++	 */
++	public static boolean checkSum(byte[] b) {
++		int sum = 0;
++		// 重数据域的第二位开始计算
++		for (int i = 4; i < b.length - 2; i++) {
++			sum = sum + b[i];
++		}
++		int res = sum / 256;
++		sum = sum - res * 256;
++		// 转换为字节来比较
++		if (b.length < 2) {
++			return false;
++		}
++		if ((byte) sum == b[b.length - 2]) {
++			return true;
++		} else {
++			return false;
++		}
++	}
++
++	/**
++	 * 计算校验和，生成校验码
++	 * 
++	 * @param msg
++	 * @return
++	 */
++	public static byte getCheckSum(byte[] b) {
++		if(b==null) return 0;
++		int sum = 0;
++		for (int i = 4; i < b.length - 2; i++) {
++			sum = sum + b[i];
++		}
++		return (byte) sum;
++	}
++	
++	
++	/**
++	* byte to int
++	* 
++	* @param b
++	*            待转换的字节数组
++	*        
++	* @return
++	*/
++	public static int byte2int(byte b[]) {
++	   return b[3] & 0xff | (b[2] & 0xff) << 8
++	     | (b[1] & 0xff) << 16 | (b[0] & 0xff) << 24;
++	}
++
++	/**
++	* int to byte
++	* 
++	* @param n待转换的整形变量
++	*
++	*/
++	public static byte[] int2byte(int n) {
++		byte buf[] = new byte[4];
++	   buf[0] = (byte) ((n >> 24) & 0xff);
++	   buf[1] = (byte) ((n >> 16) & 0xff);
++	   buf[2] = (byte) ((n >> 8) & 0xff);
++	   buf[3] = (byte) (n & 0xff);
++	   return buf;
++	}
++
++	/**
++	* @return type void
++	* @param n
++	*            待转换的short变量
++	*/
++	public static byte[] short2byte(short n) {
++		byte buf[] = new byte[2];
++	    buf[0] = (byte) (n >> 8);
++	    buf[1] = (byte) n;
++	    return buf;
++	}
++	
++	public static short byte2short(byte buf[]){
++		return (short)((buf[1] & 0xff) | (buf[0] & 0xff )<< 8);
++	}
++
++	public static long bytes2long(byte[] b) {
++		int mask = 0xff;
++		int temp = 0;
++		int res = 0;
++		for (int i = 0; i < 8; i++) {
++			res <<= 8;
++		    temp = b[i] & mask;
++		    res |= temp;
++		}
++		return res;
++	}
++
++	public static byte[] long2bytes(long num) {
++		byte[] b = new byte[8];
++		for (int i = 0; i < 8; i++) {
++			b[i] = (byte) (num >>> (56 - i * 8));
++		}
++		return b;
++	}
++
++ 
++
++}
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/DisplayUtil.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/DisplayUtil.java
+new file mode 100755
+index 0000000..b67206b
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/DisplayUtil.java
+@@ -0,0 +1,45 @@
++/*******************************************************************
++* Company:     Fuzhou Rockchip Electronics Co., Ltd
++* Filename:    DisplayUtil.java  
++* Description:   
++* @author:     fxw@rock-chips.com
++* Create at:   2011-11-24 下午08:46:27  
++* 
++* Modification History:  
++* Date         Author      Version     Description  
++* ------------------------------------------------------------------  
++* 2011-11-24      xwf         1.0         create
++*******************************************************************/   
++
++
++package com.android.server.wm.remotecontrol;
++
++import android.content.Context;
++
++public class DisplayUtil {
++	/**
++     * dp-px
++     */
++    public static int dip2px(Context context, float dpValue) {
++    	final float scale = context.getResources().getDisplayMetrics().density;
++    	return (int) (dpValue * scale + 0.5f);
++    }
++    public static int dip2px(float density, float dpValue) {
++    	final float scale = density;
++    	return (int) (dpValue * scale + 0.5f);
++    }
++    
++    
++    
++    /**
++     * px-dp
++     */
++    public static int px2dip(Context context, float pxValue) {
++    	final float scale = context.getResources().getDisplayMetrics().density;
++    	return (int) (pxValue / scale + 0.5f);
++    }
++    public static int px2dip(float density, float pxValue) {
++    	final float scale = density;
++    	return (int) (pxValue / scale + 0.5f);
++    }
++}
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/Environment.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/Environment.java
+new file mode 100755
+index 0000000..111c0f2
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/Environment.java
+@@ -0,0 +1,82 @@
++/*******************************************************************
++* Company:     Fuzhou Rockchip Electronics Co., Ltd
++* Filename:    Environment.java  
++* Description:   
++* @author:     fxw@rock-chips.com
++* Create at:   2011-12-21 下午02:16:12  
++* 
++* Modification History:  
++* Date         Author      Version     Description  
++* ------------------------------------------------------------------  
++* 2011-12-21      xwf         1.0         create
++*******************************************************************/   
++
++
++package com.android.server.wm.remotecontrol;
++
++import android.content.Context;
++import android.content.res.Configuration;
++import android.util.DisplayMetrics;
++import android.view.Display;
++import android.view.WindowManager;
++
++public class Environment {
++
++	/**
++     * The configurations are managed in a singleton.
++     */
++    private static Environment mInstance;
++    private Configuration mConfig = new Configuration();
++    private int mScreenWidth;
++    private int mScreenHeight;
++    private DisplayMetrics mDisplayMetrics;
++    
++    private Environment() {
++    }
++
++    public static Environment getInstance() {
++        if (null == mInstance) {
++            mInstance = new Environment();
++        }
++        return mInstance;
++    }
++    
++    public void onConfigurationChanged(Configuration newConfig, Context context) {   	
++    	setScreenParameter(context);
++        mConfig.updateFrom(newConfig);
++    }
++    
++    public void setScreenParameter(Context context){
++    	WindowManager wm = (WindowManager) context
++        .getSystemService(Context.WINDOW_SERVICE);
++		Display d = wm.getDefaultDisplay();
++		mScreenWidth = d.getRawWidth();
++		mScreenHeight = d.getRawHeight();
++		
++		mDisplayMetrics = context.getResources().getDisplayMetrics();
++    }
++
++	public int getScreenWidth() {
++		return mScreenWidth;
++	}
++
++	public void setScreenWidth(int screenWidth) {
++		this.mScreenWidth = screenWidth;
++	}
++
++	public int getScreenHeight() {
++		return mScreenHeight;
++	}
++
++	public void setScreenHeight(int screenHeight) {
++		this.mScreenHeight = screenHeight;
++	}
++	
++	public DisplayMetrics getDisplayMetrics(){
++		return mDisplayMetrics;
++	}
++
++	public Configuration getmConfig() {
++		return mConfig;
++	}
++}
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/GSensorControlRequest.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/GSensorControlRequest.java
+new file mode 100755
+index 0000000..9c03776
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/GSensorControlRequest.java
+@@ -0,0 +1,103 @@
++/*******************************************************************
++* Company:     Fuzhou Rockchip Electronics Co., Ltd
++* Filename:    GSensorControlRequest.java  
++* Description:   
++* @author:     fxw@rock-chips.com
++* Create at:   2011-12-19 涓嬪崍10:36:50  
++* 
++* Modification History:  
++* Date         Author      Version     Description  
++* ------------------------------------------------------------------  
++* 2011-12-19      xwf         1.0         create
++*******************************************************************/   
++
++
++package com.android.server.wm.remotecontrol;
++
++public class GSensorControlRequest extends RemoteControlRequest {
++	
++	private float gx;
++	private float gy;
++	private float gz;
++	private int accuracy;
++
++	public GSensorControlRequest(){
++		setControlType(TypeConstants.TYPE_GSENSOR);
++	}
++	
++	public GSensorControlRequest(UDPPacket packet){
++		super(packet);
++	}
++	
++	/** 
++	 * <p>Title: encodeData</p> 
++	 * <p>Description: </p> 
++	 * @return 
++	 * @see com.android.rockchip.remotecontrol.protocol.RemoteControlRequest#encodeData() 
++	 */
++	@Override
++	protected byte[] encodeData() {
++		byte[] data = new byte[16];
++		byte[] tmp = DataTypesConvert.floatToByte(gx);
++		fillData(data, tmp, 0, 3);
++		tmp = DataTypesConvert.floatToByte(gy);
++		fillData(data, tmp, 4, 7);
++		tmp = DataTypesConvert.floatToByte(gz);
++		fillData(data, tmp, 8, 11);
++		tmp = DataTypesConvert.changeIntToByte(accuracy, 4);
++		fillData(data, tmp, 12, 15);
++		return data;
++	}
++
++	/** 
++	 * <p>Title: decodeData</p> 
++	 * <p>Description: </p> 
++	 * @param data 
++	 * @see com.android.rockchip.remotecontrol.protocol.RemoteControlRequest#decodeData(byte[]) 
++	 */
++	@Override
++	protected void decodeData(byte[] data) {
++		if(data==null||data.length!=16){
++			return;
++		}
++		byte[] tmp = fetchData(data, 0, 3);
++		gx = DataTypesConvert.byteToFloat(tmp);
++		tmp = fetchData(data, 4, 7);
++		gy = DataTypesConvert.byteToFloat(tmp);
++		tmp = fetchData(data, 8, 11);
++		gz = DataTypesConvert.byteToFloat(tmp);
++		accuracy = DataTypesConvert.changeByteToInt(data, 12, 15);
++	}
++
++	public float getGx() {
++		return gx;
++	}
++
++	public void setGx(float gx) {
++		this.gx = gx;
++	}
++
++	public float getGy() {
++		return gy;
++	}
++
++	public void setGy(float gy) {
++		this.gy = gy;
++	}
++
++	public float getGz() {
++		return gz;
++	}
++
++	public void setGz(float gz) {
++		this.gz = gz;
++	}
++
++	public int getAccuracy() {
++		return accuracy;
++	}
++
++	public void setAccuracy(int accuracy) {
++		this.accuracy = accuracy;
++	}
++}
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/GSensorRequestListener.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/GSensorRequestListener.java
+new file mode 100755
+index 0000000..97701c2
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/GSensorRequestListener.java
+@@ -0,0 +1,78 @@
++/*******************************************************************
++* Company:     Fuzhou Rockchip Electronics Co., Ltd
++* Filename:    GSensorRequestListener.java  
++* Description:   
++* @author:     fxw@rock-chips.com
++* Create at:   2011-12-20 下午12:07:11  
++* 
++* Modification History:  
++* Date         Author      Version     Description  
++* ------------------------------------------------------------------  
++* 2011-12-20      xwf         1.0         create
++*******************************************************************/   
++
++package com.android.server.wm.remotecontrol;
++
++import java.lang.reflect.Method;
++
++import android.hardware.Sensor;
++import android.os.IBinder;
++import android.util.Log;
++
++
++public class GSensorRequestListener implements ControlSocket.RequestListener {
++	private void LOG(String msg){
++		Log.d("GsensorRequestListener",msg);
++	}
++//	private Object sensorService;
++//	private Object sensorManager;
++//	private Method injectSensorEvent;
++//	private Method setRemoteSensorEnabled;
++	private SensorManagerService sensorManagerService;
++	private boolean isEnabled = false;
++	
++	public GSensorRequestListener(){
++//		sensorService = ReflectUtils.invokeStaticMethod("android.os.ServiceManager", "getService", "remotesensor");
++//		sensorManager = ReflectUtils.invokeStaticMethod("android.hardware.ISensorManager$Stub", "asInterface", new Class[]{IBinder.class}, sensorService);
++//		injectSensorEvent = ReflectUtils.getMethod("android.hardware.ISensorManager", "injectSensorEvent", float[].class, int.class, long.class, int.class); 
++//		setRemoteSensorEnabled = ReflectUtils.getMethod("android.hardware.ISensorManager", "setRemoteSensorEnabled", boolean.class);
++		sensorManagerService = new SensorManagerService();
++	}
++	
++	/** 
++	 * <p>Title: requestRecieved</p> 
++	 * <p>Description: </p> 
++	 * @param packet 
++	 * @see com.android.rockchip.remotecontrol.protocol.ControlSocket.RequestListener#requestRecieved(com.android.rockchip.common.core.udp.UDPPacket) 
++	 */
++	@Override
++	public void requestRecieved(UDPPacket packet) {
++		try {
++			GSensorControlRequest request = new GSensorControlRequest(packet);
++			int controlType = request.getControlType();
++			if(TypeConstants.TYPE_GSENSOR_ENABLED == controlType){
++				sensorManagerService.setRemoteSensorEnabled(true);
++				isEnabled = true;
++				LOG("Enable Remote GSensor");
++			}else if(TypeConstants.TYPE_GSENSOR_DISABLED == controlType){
++				sensorManagerService.setRemoteSensorEnabled(false);
++				isEnabled = false;
++				LOG("Disable Remote GSensor. ");
++			}else if(TypeConstants.TYPE_GSENSOR == controlType){
++				
++				float x = request.getGx();
++				float y = request.getGy();
++				float z = request.getGz();
++				float[] values = {x, y, z};
++//				LOG("gsensor:"+x+","+y+","+z);
++				sensorManagerService.injectSensorEvent(values, request.getAccuracy(), System.nanoTime(), Sensor.TYPE_ACCELEROMETER);
++			}
++		} catch (Exception e) {
++			e.printStackTrace();
++		}
++	}
++	
++	public SensorManagerService getSensorManager(){
++		return sensorManagerService;
++	}
++}
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/MouseControlRequest.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/MouseControlRequest.java
+new file mode 100755
+index 0000000..5f5246f
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/MouseControlRequest.java
+@@ -0,0 +1,174 @@
++/*******************************************************************
++* Company:     Fuzhou Rockchip Electronics Co., Ltd
++* Filename:    MouseControlRequest.java  
++* Description:   
++* @author:     fxw@rock-chips.com
++* Create at:   2011-12-20 下午05:55:30  
++* 
++* Modification History:  
++* Date         Author      Version     Description  
++* ------------------------------------------------------------------  
++* 2011-12-20      xwf         1.0         create
++*******************************************************************/   
++
++
++package com.android.server.wm.remotecontrol;
++
++public class MouseControlRequest extends RemoteControlRequest {
++
++	private boolean isAbsolute;
++	private int pointCount;
++	private int[] pointerIds;
++	private float[] mouseX;
++	private float[] mouseY;
++	private int actionCode;
++	private int screenWidth;
++	private int screenHeight;
++	
++	public MouseControlRequest(){
++		setControlType(TypeConstants.TYPE_MOUSE);
++	}
++	
++	public MouseControlRequest(UDPPacket packet){
++		super(packet);
++	}
++	
++	/** 
++	 * <p>Title: encodeData</p> 
++	 * <p>Description: </p> 
++	 * @return 
++	 * @see com.android.rockchip.remotecontrol.protocol.RemoteControlRequest#encodeData() 
++	 */
++	@Override
++	protected byte[] encodeData() {
++		/**
++		 * isabsolute 1byte,
++		 * pointerCount 2byte
++		 * pointerIds (2*Pcount) byte
++		 *  x-y (Pcount * 2 * 4)byte
++		 *  action 4byte
++		 *  screen w-h 8byte
++		 */
++
++		byte[] data = new byte[15+pointCount * 10];
++		data[0] = isAbsolute ? ((byte)1) : (byte)0;
++		byte [] tmp = DataTypesConvert.changeIntToByte(pointCount, 2);
++		fillData(data, tmp, 1, 2);
++		for (int i = 0; i < pointCount; i++){
++			tmp = DataTypesConvert.changeIntToByte(pointerIds[i], 2);
++			fillData(data, tmp, 3+10*i, 4+10*i);
++			tmp = DataTypesConvert.floatToByte(mouseX[i]);
++			fillData(data, tmp, 5+10*i, 8+10*i);
++			tmp = DataTypesConvert.floatToByte(mouseY[i]);
++			fillData(data, tmp, 9+10*i, 12+10*i);
++		}
++		int newIndex = 3+10*pointCount;
++		tmp = DataTypesConvert.changeIntToByte(actionCode, 4);
++		fillData(data, tmp, newIndex, newIndex+3);
++		
++		//screenWidth
++		newIndex = newIndex + 4;
++		tmp = DataTypesConvert.changeIntToByte(screenWidth, 4);
++		fillData(data, tmp, newIndex, newIndex+3);
++		//screenHeight
++		newIndex = newIndex + 4;
++		tmp = DataTypesConvert.changeIntToByte(screenHeight, 4);
++		fillData(data, tmp, newIndex, newIndex+3);
++		return data;
++	}
++	
++	/** 
++	 * <p>Title: decodeData</p> 
++	 * <p>Description: </p> 
++	 * @param data 
++	 * @see com.android.rockchip.remotecontrol.protocol.RemoteControlRequest#decodeData(byte[]) 
++	 */
++	@Override
++	protected void decodeData(byte[] data) {
++		isAbsolute = (data[0]==1?true:false);
++		byte[] tmp = fetchData(data, 1, 2);
++		pointCount = DataTypesConvert.changeByteToInt(tmp);
++		mouseX = new float[pointCount];
++		mouseY = new float[pointCount];
++		pointerIds = new int[pointCount];
++		for (int i = 0; i < pointCount; i++){
++//			tmp = fetchData(data, 3+10*i, 4+10*i);
++			pointerIds[i] = DataTypesConvert.changeByteToInt(data, 3+10*i, 4+10*i);
++			tmp = fetchData(data, 5+10*i, 8+10*i);
++			mouseX[i] = DataTypesConvert.byteToFloat(tmp);
++			tmp = fetchData(data, 9+10*i, 12+10*i);
++			mouseY[i] = DataTypesConvert.byteToFloat(tmp);
++		}
++		int newIndex = 3+10*pointCount;
++		actionCode = DataTypesConvert.changeByteToInt(data, newIndex, newIndex+3);
++		newIndex = newIndex+4;
++		screenWidth = DataTypesConvert.changeByteToInt(data, newIndex, newIndex+3);
++		newIndex = newIndex+4;
++		screenHeight = DataTypesConvert.changeByteToInt(data, newIndex, newIndex+3);
++		super.decodeData(data);
++	}
++
++	public int getPointerCount(){
++		return pointCount;
++	}
++	
++	public void setPointerCount(int count){
++		pointCount = count;
++	}
++	
++	public int[] getPointerIds(){
++		return pointerIds;
++	}
++	
++	public void setPointerIds(int[] pointerIds){
++		this.pointerIds = pointerIds;
++	}
++	
++	public float[] getMouseX() {
++		return mouseX;
++	}
++
++	public void setMouseX(float[] mouseX) {
++		this.mouseX = mouseX;
++	}
++
++	public int getActionCode() {
++		return actionCode;
++	}
++
++	public void setActionCode(int actionCode) {
++		this.actionCode = actionCode;
++	}
++
++	public float[] getMouseY() {
++		return mouseY;
++	}
++
++	public void setMouseY(float[] mouseY) {
++		this.mouseY = mouseY;
++	}
++
++	public boolean isAbsolute() {
++		return isAbsolute;
++	}
++
++	public void setAbsolute(boolean isAbsolute) {
++		this.isAbsolute = isAbsolute;
++	}
++
++	public int getScreenWidth() {
++		return screenWidth;
++	}
++
++	public void setScreenWidth(int screenWidth) {
++		this.screenWidth = screenWidth;
++	}
++
++	public int getScreenHeight() {
++		return screenHeight;
++	}
++
++	public void setScreenHeight(int screenHeight) {
++		this.screenHeight = screenHeight;
++	}
++}
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/MouseManager.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/MouseManager.java
+new file mode 100755
+index 0000000..1d2bcb7
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/MouseManager.java
+@@ -0,0 +1,243 @@
++/*******************************************************************
++ * Company:     Fuzhou Rockchip Electronics Co., Ltd
++ * Filename:    MouseManager.java
++ * Description:   
++ * @author:     fxw@rock-chips.com
++ * Create at:   下午10:25:14
++ * 
++ * Modification History:  
++ * Date         Author      Version     Description  
++ * ------------------------------------------------------------------  
++ * 2011-11-29      xwf         1.0         create
++ *******************************************************************/
++package com.android.server.wm.remotecontrol;
++
++
++import java.lang.reflect.Method;
++
++import com.android.server.wm.WindowManagerService;
++
++//import com.android.rockchip.common.util.ReflectUtils;
++
++import android.content.Context;
++import android.os.SystemClock;
++import android.util.Log;
++import android.view.MotionEvent;
++import android.view.MotionEvent.PointerCoords;
++import android.view.View;
++
++public class MouseManager {
++	
++	private Context mContext;
++	private View mMouseView;
++	private int mScreenWidth;
++	private int mScreenHeight;
++	private float mMouseX;
++	private float mMouseY;
++	private float mLastX;
++	private float mLastY;
++	private static final float mScale = 2.0f;
++	
++	private boolean isMultPointer = false;
++
++	private Environment mEnvironment;
++	
++	WindowManagerService mService;
++	
++	public MouseManager(Context context,WindowManagerService service){
++		mContext = context;
++		mEnvironment = Environment.getInstance();
++		mEnvironment.setScreenParameter(mContext);
++		mScreenWidth = mEnvironment.getScreenWidth();
++		mScreenHeight = mEnvironment.getScreenHeight();
++		mMouseX = mScreenWidth/2;
++		mMouseY = mScreenHeight/2;
++		mService = service;
++	}
++	
++	/**
++	 * 添加指针
++	 */
++	public void addMouse(final boolean visble){
++
++	}
++	
++	/**
++	 * 显示鼠标指针
++	 */
++	
++	public void internalShowMouse(int pointerCount,int[] pointerIds,float[] mouseX, float[] mouseY, final int action, boolean isAbsolute){
++		if (pointerCount == 1){
++			float newMouseX = 0;
++			float newMouseY = 0;
++			
++			if(isAbsolute){
++				newMouseX = mouseX[0];
++				newMouseY = mouseY[0];
++			}else{
++				if (action == MotionEvent.ACTION_MOVE){
++					newMouseX = mMouseX + (mouseX[0]-mLastX)*mScale;
++					newMouseY = mMouseY + (mouseY[0]-mLastY)*mScale;
++				} else {
++					newMouseX = mMouseX;
++					newMouseY = mMouseY;
++				}
++				mLastX = mouseX[0];
++				mLastY = mouseY[0];
++			}
++
++			if(newMouseX>mScreenWidth) newMouseX = mScreenWidth-5;
++			if(newMouseY>mScreenHeight) newMouseY = mScreenHeight-5;
++			if(newMouseX<0) newMouseX = 0;
++			if(newMouseY<0) newMouseY = 0;
++			if(Math.floor(mMouseX)!= Math.floor(newMouseX)|| Math.floor(mMouseY)!= Math.floor(newMouseY)){
++//				Log.d("MouseManager"," screenSize:"+mScreenWidth+","+mScreenHeight);
++				mMouseX = newMouseX;
++				mMouseY = newMouseY;
++				if (!isAbsolute)
++					dispatchMouse(mMouseX, mMouseY);
++			}
++		}
++		
++		if (!isAbsolute){
++			if ((action & MotionEvent.ACTION_MASK)== MotionEvent.ACTION_POINTER_DOWN){
++				int[] pIds = new int[1];
++				float[] mX = new float[1];
++				float[] mY = new float[1];
++				pIds[0] = 0;
++				mX[0] = mouseX[0] + 1;
++				mY[0] = mouseY[0] + 1;
++				injectMultiPoint(1, pIds, mX, mY, MotionEvent.ACTION_DOWN);
++			}else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_DOWN){
++				if (isMultPointer){
++					injectMultiPoint(pointerCount,pointerIds,mouseX,mouseY,action);
++					isMultPointer = false;
++					return;
++				}
++			}
++		} 
++		moveMouse(pointerCount,pointerIds,mouseX, mouseY, action, isAbsolute);
++	}
++	
++	/**
++	 * 移动鼠标
++	 * @param action
++	 */
++	volatile int cnt = 0;
++	volatile int moveZeroCnt=0;
++	volatile boolean downFlag = false;
++	volatile boolean moveFlag = false;
++	protected synchronized void moveMouse(int pointerCount,int[] pointerIds,float[] moveX, float[] moveY, int action, boolean isAbsolute){
++		if(isAbsolute || isMultPointer){
++			injectMultiPoint(pointerCount,pointerIds,moveX,moveY,action);
++			return;
++		}
++		
++//		if(cnt<5){
++//			if(cnt!=moveZeroCnt){
++//				moveFlag = true;
++//			}
++//		}else{
++//			if(!moveFlag){
++//				if(!downFlag){
++//					if(action==MotionEvent.ACTION_MOVE){ 
++//						Log.d("MouseManager","MouseX: " + mMouseX + "MouseY: " + mMouseY);
++//						injectMoveMouse(MotionEvent.ACTION_DOWN);
++//						downFlag = true;
++//					}
++//				}else{
++//					injectMoveMouse(action);
++//				}
++//			}
++//		}
++		
++		if(action == MotionEvent.ACTION_DOWN){
++			cnt = 0;
++//			moveZeroCnt = 0;
++//			downFlag = false;
++//			moveFlag = false;
++		}else if(action == MotionEvent.ACTION_MOVE){
++			cnt++;
++//			if(Math.abs(moveX[0])<=5&&Math.abs(moveY[0])<=5){
++//				moveZeroCnt++;
++//			}
++		}else if(action==MotionEvent.ACTION_UP){
++//			if(cnt<5&&!downFlag){
++			if(cnt<5){
++				injectMoveMouse(MotionEvent.ACTION_DOWN);
++				injectMoveMouse(MotionEvent.ACTION_UP);
++			}
++			cnt = 0;
++//			moveZeroCnt = 0;
++//			downFlag = false;
++//			moveFlag = false;
++		}
++	}
++	
++	protected void injectMoveMouse(int action){
++		long now = SystemClock.uptimeMillis();
++		MotionEvent e = MotionEvent.obtain(now, now, action, mMouseX, mMouseY, 0);
++		mService.injectPointerEvent(e, false);
++	}
++	
++	protected void injectMultiPoint(int pointerCount,int[] pointerIds,float[] moveX, float[] moveY, int action){
++		long now = SystemClock.uptimeMillis();
++		PointerCoords[] pointerCoords = new PointerCoords[pointerCount];
++		for (int i=0 ; i<pointerCount; i++){
++			pointerCoords[i] = new PointerCoords();
++			pointerCoords[i].x = moveX[i];
++			pointerCoords[i].y = moveY[i];
++			pointerCoords[i].pressure = 0.5f;
++//			Log.d("MouseManager","pointer at "+i+" :"+
++//					" xy:"+moveX[i]+","+moveY[i]+" pointerId:"+pointerIds[i]);
++		}
++		MotionEvent e = MotionEvent.obtain(now, now, action, pointerCount,
++				pointerIds, pointerCoords, 0, 1.0f, 1.0f, 0, 0, 0, 0);
++		mService.injectPointerEvent(e, false);
++	}
++	
++	/**
++	 * 调用WindowManagerService绘制鼠标
++	 * @param mouseX
++	 * @param mouseY
++	 * @param state
++	 */
++	private void dispatchMouse(float X, float Y){
++//		Long t = System.currentTimeMillis();
++		mService.dispatchMousebyCd(X, Y);
++//		Log.d("mouseManager","mouse reflect time:"+(System.currentTimeMillis()-t));
++	}
++	
++
++	
++	
++	/**
++	 * 获取当前鼠标X轴坐标
++	 * @return
++	 */
++	public float getMouseX(){
++		return mMouseX;
++	}
++	
++	/**
++	 * 获取当前鼠标Y轴坐标
++	 * @return
++	 */
++	public float getMouseY(){
++		return mMouseY;
++	}
++	
++	public boolean isMultPointer(int action){
++		if ((action & MotionEvent.ACTION_MASK)== MotionEvent.ACTION_POINTER_DOWN)
++			isMultPointer = true;
++		return isMultPointer;
++	}
++	
++	public void ConfigChange(){
++		if (mEnvironment != null) {
++			mScreenWidth = mEnvironment.getScreenWidth();
++			mScreenHeight = mEnvironment.getScreenHeight();
++		}
++	}
++	
++}
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/MouseRequestListener.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/MouseRequestListener.java
+new file mode 100755
+index 0000000..aff3de0
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/MouseRequestListener.java
+@@ -0,0 +1,100 @@
++/*******************************************************************
++* Company:     Fuzhou Rockchip Electronics Co., Ltd
++* Filename:    MouseRequestListener.java  
++* Description:   
++* @author:     fxw@rock-chips.com
++* Create at:   2011-12-20 下午06:24:08  
++* 
++* Modification History:  
++* Date         Author      Version     Description  
++* ------------------------------------------------------------------  
++* 2011-12-20      xwf         1.0         create
++*******************************************************************/   
++
++
++package com.android.server.wm.remotecontrol;
++
++import android.content.Context;
++import android.util.DisplayMetrics;
++import android.util.Log;
++
++public class MouseRequestListener implements ControlSocket.RequestListener {
++	private void LOG(String msg){
++		Log.d("MouseRequestListener",msg);
++	}
++	
++	private MouseManager mMouseManager;
++	private Environment mEnvironment;
++	private Context mContext;
++	
++	private float cWidth;
++	private float cHeight;
++	
++	public MouseRequestListener(Context context) {
++		mEnvironment = Environment.getInstance();
++		mEnvironment.setScreenParameter(context);
++		mContext = context;
++		
++//		DisplayMetrics dm = mEnvironment.getDisplayMetrics();
++//		cWidth = DisplayUtil.px2dip(dm.density, mEnvironment.getScreenWidth());
++//		cHeight = DisplayUtil.px2dip(dm.density, mEnvironment.getScreenHeight());
++		cWidth = mEnvironment.getScreenWidth();
++		cHeight = mEnvironment.getScreenHeight();
++	}
++	
++	/** 
++	 * <p>Title: requestRecieved</p> 
++	 * <p>Description: </p> 
++	 * @param packet 
++	 * @see com.android.rockchip.remotecontrol.protocol.ControlSocket.RequestListener#requestRecieved(com.android.rockchip.common.core.udp.UDPPacket) 
++	 */
++	@Override
++	public void requestRecieved(UDPPacket packet) {
++		
++		MouseControlRequest request = new MouseControlRequest(packet);
++
++		int controlType = request.getControlType();
++		
++		if(TypeConstants.TYPE_MOUSE == controlType){
++			if(mMouseManager!=null){
++				boolean isAbsolute = request.isAbsolute();
++				int pointCount = request.getPointerCount();
++				int[] pointerIds = request.getPointerIds();
++				float[] mouseX = request.getMouseX();
++				float[] mouseY = request.getMouseY();
++				int action = request.getActionCode();
++//				LOG("action: "+action+" request at:"+System.currentTimeMillis());
++//				
++//				for (int j=0 ; j<pointCount ; j++){
++//					LOG("The pointer "+j+" :"+mouseX[j]+","+mouseY[j]+" pointer id:"+pointerIds[j]);
++//				}
++				//绝对坐标放大或缩小 以Dip为单位
++				if(isAbsolute || mMouseManager.isMultPointer(action)){
++					int rWidth = request.getScreenWidth();
++					int rHeight = request.getScreenHeight();
++
++					for (int i = 0; i < pointCount ; i++){
++						mouseX[i] = mouseX[i]*(cWidth/rWidth);
++						mouseY[i] = mouseY[i]*(cHeight/rHeight);
++					}
++			
++				}
++				mMouseManager.internalShowMouse(pointCount,pointerIds,mouseX, mouseY, action, isAbsolute);
++			}
++		}
++	}
++	
++	public void setMouseManager(MouseManager mouseManager){
++		mMouseManager = mouseManager;
++	}
++	
++	public void ConfigChange(){
++		if (mEnvironment != null){
++//			DisplayMetrics dm = mEnvironment.getDisplayMetrics();
++//			cWidth = DisplayUtil.px2dip(dm.density, mEnvironment.getScreenWidth());
++//			cHeight = DisplayUtil.px2dip(dm.density, mEnvironment.getScreenHeight());
++			cWidth = mEnvironment.getScreenWidth();
++			cHeight = mEnvironment.getScreenHeight();
++		}
++	}
++}
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/RemoteControlManager.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/RemoteControlManager.java
+new file mode 100755
+index 0000000..27c7e7c
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/RemoteControlManager.java
+@@ -0,0 +1,127 @@
++package com.android.server.wm.remotecontrol;
++
++import android.content.BroadcastReceiver;
++import android.content.Context;
++import android.content.Intent;
++import android.content.IntentFilter;
++import android.util.Log;
++
++import com.android.server.wm.WindowManagerService;
++
++public class RemoteControlManager {
++	private Context mContext;
++	private Environment mEnvironment;
++	private WindowManagerService mService;
++	
++	private MouseManager mMouseManager;
++	private MouseRequestListener mouseListener;
++	
++	private SoftKeyRequestListener SoftKeyListener;
++	
++	private ScrollRequestListener ScrollRequestListener;
++	
++	private WimoRequestListener WimoRequestListener;
++	
++	private GSensorRequestListener GsensorRequestListener;
++	
++	public static final int MOUSE_REMOTE_CONTROL_PORT = 56456;
++	public static final int SOFTKEY_REMOTE_CONTROL_PORT = MOUSE_REMOTE_CONTROL_PORT + 1;
++	public static final int GSENSOR_REMOTE_CONTROL_PORT = MOUSE_REMOTE_CONTROL_PORT + 2;
++	
++	public RemoteControlManager(Context context, WindowManagerService service){
++		mContext = context;
++		mService = service;
++	}
++	
++	private BroadcastReceiver mConfigChangeReciever = new BroadcastReceiver() {
++		
++		@Override
++		public void onReceive(Context context, Intent intent) {
++			// TODO Auto-generated method stub
++			Log.d("RemoteControlManager","BroadcastReceiver:"+intent.getAction());
++			if (intent.getAction().equals(Intent.ACTION_CONFIGURATION_CHANGED)){
++				if (mEnvironment != null) {
++					mEnvironment.onConfigurationChanged(context.getResources().getConfiguration(), context);
++				}
++				if (mouseListener != null) {
++					mouseListener.ConfigChange();
++				}
++				if (mMouseManager != null) {
++					mMouseManager.ConfigChange();
++				}
++				if (ScrollRequestListener != null) {
++					ScrollRequestListener.ConfigChange();
++				}
++			}
++		}
++	};
++	
++	public void startListener(){
++		 //remote control thread		
++		
++		IntentFilter filter = new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED);
++		mContext.registerReceiver(mConfigChangeReciever, filter);
++		
++		mEnvironment = Environment.getInstance();
++		mEnvironment.onConfigurationChanged(mContext.getResources().getConfiguration(), mContext);
++		
++        mMouseManager = new MouseManager(mContext,mService);
++		
++		mouseListener = new MouseRequestListener(mContext);
++		mouseListener.setMouseManager(mMouseManager);
++		
++		SoftKeyListener = new SoftKeyRequestListener(mContext, mService);
++		SoftKeyListener.setMouseManager(mMouseManager);
++		
++		ScrollRequestListener = new ScrollRequestListener(mContext, mService);
++		
++		WimoRequestListener = new WimoRequestListener(mContext);
++		
++		GsensorRequestListener = new GSensorRequestListener();
++		
++		ControlSocket mMouseControlSocket = new ControlSocket(MOUSE_REMOTE_CONTROL_PORT,"MouseControlSocket");
++		mMouseControlSocket.setRequestListener(new ControlSocket.RequestListener() {
++			
++			@Override
++			public void requestRecieved(UDPPacket packet) {
++				// TODO Auto-generated method stub
++				if (packet == null) return;
++				RemoteControlRequest request = new RemoteControlRequest(packet);
++				if (request.isBadMsg) {
++					if (TypeConstants.TYPE_DEVICE_CHECK_COMMAND == request.getCommandType()){
++						RemoteControlRequest deviceRespone = new RemoteControlRequest();
++						deviceRespone.setControlType(TypeConstants.TYPE_DEVICE_CHECK);
++						deviceRespone.setRequestHost(packet.getRemoteAddress());
++						deviceRespone.post(RemoteControlRequest.REMOTE_CONTROL_PORT);
++						deviceRespone.close();
++					}
++					return;
++				}
++				if(TypeConstants.TYPE_MOUSE_COMMAND == request.getCommandType()){
++					mouseListener.requestRecieved(packet);
++				}else if (TypeConstants.TYPE_GSENSOR_COMMAND == request.getCommandType()){
++					GsensorRequestListener.requestRecieved(packet);
++				}else if (TypeConstants.TYPE_SCROLL_COMMAND == request.getCommandType()){
++					ScrollRequestListener.requestRecieved(packet);
++				}else if(TypeConstants.TYPE_SOFTKEY_COMMAND == request.getCommandType()){
++					SoftKeyListener.requestRecieved(packet);
++				}else if (TypeConstants.TYPE_WIMO_COMMAND == request.getCommandType()){
++					WimoRequestListener.requestRecieved(packet);
++				}
++			}
++		});
++		mMouseControlSocket.start();
++		
++//		SoftKeyListener = new SoftKeyRequestListener(mContext, mService);
++//		SoftKeyListener.setMouseManager(mMouseManager);
++//		ControlSocket mSoftKeyControlSocket = new ControlSocket(SOFTKEY_REMOTE_CONTROL_PORT, "SoftKeyControlSocket");
++//		mSoftKeyControlSocket.setRequestListener(SoftKeyListener);
++//		mSoftKeyControlSocket.start();
++	}
++	
++	public SensorManagerService getRemoteSensorManager(){
++		if (GsensorRequestListener != null)
++			return GsensorRequestListener.getSensorManager();
++		return null;
++	}
++}
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/RemoteControlRequest.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/RemoteControlRequest.java
+new file mode 100755
+index 0000000..f37450c
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/RemoteControlRequest.java
+@@ -0,0 +1,233 @@
++/*******************************************************************
++* Company:     Fuzhou Rockchip Electronics Co., Ltd
++* Filename:    RemoteControlRequest.java  
++* Description:   
++* @author:     fxw@rock-chips.com
++* Create at:   2011-12-19 下午10:13:55  
++* 
++* Modification History:  
++* Date         Author      Version     Description  
++* ------------------------------------------------------------------  
++* 2011-12-19      xwf         1.0         create
++*******************************************************************/   
++
++
++package com.android.server.wm.remotecontrol;
++
++import static com.android.server.wm.remotecontrol.DataTypesConvert.changeIntToByte;
++import static com.android.server.wm.remotecontrol.DataTypesConvert.changeByteToInt;
++import android.util.Log;
++
++//import com.android.rockchip.common.core.http.HTTP;
++//import com.android.rockchip.common.core.upnp.Device;
++
++public class RemoteControlRequest {
++	private static final String TAG = "RemoteControlRequest";
++	private static final boolean DEBUG = true;
++	private void LOG(String msg){
++		if (DEBUG) {
++			Log.d(TAG,msg);
++		}
++	}
++
++	public static final int REMOTE_CONTROL_PORT = 56456;
++	public static final int SOFTKEY_REMOTE_CONTROL_PORT = REMOTE_CONTROL_PORT + 1;
++	public static final int GSENSOR_REMOTE_CONTROL_PORT = REMOTE_CONTROL_PORT + 2;
++	public static final int CONNECT_STATE_PORT = REMOTE_CONTROL_PORT + 3;
++	public static final int MIN_MSG_LEN = 4;
++
++	//CONTROL-TYPE -- 2bytes
++	private int controlType;
++	//数据长度 -- 2bytes
++	private int length;
++	//DATA
++	private byte[] data;
++	private UDPSocket uSocket;
++	private String requestHost = "";
++	private int requestPort = -1;
++	
++	protected boolean isBadMsg = false;
++	
++	public RemoteControlRequest(){
++	}
++	
++	public RemoteControlRequest(byte[] msg){
++		decodeMessage(msg);
++	}
++	
++	public RemoteControlRequest(UDPPacket packet){
++		decodeMessage(packet.getData());
++	}
++	
++	/**
++	 * 构建数据体
++	 */
++	protected byte[] encodeData(){
++		return new byte[0];
++	}
++	
++	/**
++	 * 解析数据体
++	 */
++	protected void decodeData(byte[] data){
++	}
++	
++	/**
++	 * 发送请求
++	 */
++	public boolean post(int Port){
++		if(uSocket==null){
++			uSocket = new UDPSocket();
++		}
++		if(Port > 0){
++			//发送到默认的指定控制端口
++			requestPort = Port;
++		}
++		return uSocket.post(requestHost, requestPort, encodeMessage());
++	}
++	
++	/**
++	 * 关闭
++	 * @return
++	 */
++	public boolean close(){
++		if(uSocket!=null){
++			uSocket.close();
++		}
++		return true;
++	}
++	
++//	public void setRequestHost(Device device){
++//		String postURL = device.getRootDevice().getURLBase();
++//		if (postURL == null || postURL.length() <= 0)
++//			postURL = device.getRootDevice().getLocation();
++//		
++//		String reqHost = HTTP.getHost(postURL);
++//		int reqPort = HTTP.getPort(postURL);
++//		setRequestHost(reqHost);
++//		setRequestPort(reqPort);
++//	}
++	
++	/**
++	 * 构建消息体
++	 * @return
++	 */
++	public byte[] encodeMessage() {
++		int len = MIN_MSG_LEN;
++		data = encodeData();
++		length = data.length;
++		if(data!=null)
++			len += data.length;
++		byte[] msg = new byte[len];
++		//controlType 2
++		byte[] tmp = changeIntToByte(controlType, 2);
++		msg[0] = tmp[0];
++		msg[1] = tmp[1];
++		//Length 2
++		tmp = changeIntToByte(length, 2);
++		msg[2] = tmp[0];
++		msg[3] = tmp[1];
++		//DATA
++		fillData(msg, data, 4, len-1);
++		return msg;
++	}
++	
++	/**
++	 * 解析消息体
++	 * @param msg
++	 */
++	public void decodeMessage(byte[] msg){
++		isBadMsg = false;
++		if(msg==null||msg.length<MIN_MSG_LEN){
++			LOG("Bad message. Message is null or too short");
++			isBadMsg = true;
++			return;
++		}
++		length = changeByteToInt(msg, 2, 3);
++		if(length + MIN_MSG_LEN != msg.length){
++			LOG("Bad message. Message length error. ");
++			isBadMsg = true;
++			return;
++		}
++		//controlType 2
++		controlType = changeByteToInt(msg, 0, 1);
++		//DATA
++		data = fetchData(msg, 4, msg.length-1);
++		if(data==null || data.length != length){
++			LOG("data error");
++			isBadMsg = true;
++			return;
++		}
++		decodeData(data);
++	}
++	
++	/**
++	 * 填充数据体DATA
++	 * @return
++	 */
++	public void fillData(byte[] msg, byte[] data, int start, int end){
++		if(data==null||start>end) return;
++		for(int i=start,j=0; i<=end&&j<data.length; i++,j++){
++			msg[i] = data[j];
++		}
++	}
++	/**
++	 * 从消息体中获取DATA字段
++	 * @return
++	 */
++	public byte[] fetchData(byte[] msg, int start, int end){
++		if(start>end) return null;
++		byte[] tData = new byte[end-start+1];
++		for(int i=start,j=0; i<=end; i++,j++){
++			tData[j] = msg[i];
++		}
++		return tData;
++	}
++	
++	public int getControlType() {
++		return controlType;
++	}
++	
++	public int getCommandType() {
++		return controlType&0xFF00;
++	}
++
++	public void setControlType(int controlType) {
++		this.controlType = controlType;
++	}
++
++	public int getLength() {
++		if(data==null) return 0;
++		return data.length;
++	}
++	/**
++	 * @hide
++	 */
++	public void setLength(int length) {
++		this.length = length;
++	}
++	public String getStringData() {
++		if(data==null) return null;
++		return new String(data);
++	}
++	public byte[] getData() {
++		return data;
++	}
++	
++	public void setRequestHost(String host)
++	{
++		requestHost = host;
++	}
++	public String getRequestHost()
++	{
++		return requestHost;
++	}
++	public void setRequestPort(int host)
++	{
++		requestPort = host;
++	}
++	public int getRequestPort()
++	{
++		return requestPort;
++	}
++}
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/ScrollControlRequest.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/ScrollControlRequest.java
+new file mode 100755
+index 0000000..149fa90
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/ScrollControlRequest.java
+@@ -0,0 +1,90 @@
++package com.android.server.wm.remotecontrol;
++
++import android.util.Log;
++
++public class ScrollControlRequest extends RemoteControlRequest {
++	private boolean DEBUG = false;
++	private void LOG(String msg){
++		if (DEBUG)
++		Log.d("ScrollControlRequest",msg);
++	}
++	
++	private int mOrientation; // 0:vertical , 1:horizontal
++	private float mOffset;
++	private int mTotalLenght;
++	private int mAction;
++	
++	public ScrollControlRequest(){
++		setControlType(TypeConstants.TYPE_SCROLL);
++	}
++	
++	public ScrollControlRequest(UDPPacket packet){
++		super(packet);
++	}
++	
++	@Override
++	protected byte[] encodeData() {
++		// TODO Auto-generated method stub
++		/*
++		 * scroll orientation: 1byte
++		 * scrollbar lenght: 4byte
++		 * scroll offset: 4byte
++		 * action : 4byte
++		 */
++		byte[] data = new byte[13];
++		data[0] = (byte)mOrientation;
++		byte[] tmp = DataTypesConvert.changeIntToByte(mTotalLenght, 4);
++		fillData(data, tmp, 1, 4);
++		tmp = DataTypesConvert.floatToByte(mOffset);
++		fillData(data, tmp, 5, 8);
++		tmp = DataTypesConvert.changeIntToByte(mAction,4);
++		fillData(data, tmp, 9, 12);
++		return data;
++	}
++	
++	@Override
++	protected void decodeData(byte[] data) {
++		// TODO Auto-generated method stub
++		mOrientation = data[0];
++		byte[] tmp = fetchData(data, 1, 4);
++		mTotalLenght = DataTypesConvert.changeByteToInt(tmp);
++		tmp = fetchData(data, 5, 8);
++		mOffset = DataTypesConvert.byteToFloat(tmp);
++		tmp = fetchData(data, 9, 12);
++		mAction = DataTypesConvert.changeByteToInt(tmp);
++	}
++
++	public int getmOrientation() {
++		return mOrientation;
++	}
++
++	public void setmOrientation(int mOrientation) {
++		this.mOrientation = mOrientation;
++	}
++
++	public float getmOffset() {
++		return mOffset;
++	}
++
++	public void setmOffset(float mOffset) {
++		this.mOffset = mOffset;
++	}
++
++	public int getmTotalLenght() {
++		return mTotalLenght;
++	}
++
++	public void setmTotalLenght(int mTotalLenght) {
++		this.mTotalLenght = mTotalLenght;
++	}
++
++	public int getmAction() {
++		return mAction;
++	}
++
++	public void setmAction(int mAction) {
++		this.mAction = mAction;
++	}
++	
++	
++}
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/ScrollRequestListener.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/ScrollRequestListener.java
+new file mode 100755
+index 0000000..ff8011a
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/ScrollRequestListener.java
+@@ -0,0 +1,96 @@
++package com.android.server.wm.remotecontrol;
++
++import com.android.server.wm.WindowManagerService;
++
++import android.content.Context;
++import android.os.SystemClock;
++import android.util.DisplayMetrics;
++import android.util.Log;
++import android.view.MotionEvent;
++
++public class ScrollRequestListener implements ControlSocket.RequestListener {
++	private void LOG(String msg){
++		Log.d("ScrollRequestListener",msg);
++	}
++	
++	private WindowManagerService mService;
++	private Environment mEnvironment;
++	private Context mContext;
++	
++	private float cWidth;
++	private float cHeight;
++	
++	private float mMouseX;
++	private float mMouseY;
++	
++	public ScrollRequestListener(Context context,WindowManagerService service) {
++		mEnvironment = Environment.getInstance();
++		mEnvironment.setScreenParameter(context);
++		mContext = context;
++		mService = service;
++		
++//		DisplayMetrics dm = mEnvironment.getDisplayMetrics();
++//		cWidth = DisplayUtil.px2dip(dm.density, mEnvironment.getScreenWidth());
++//		cHeight = DisplayUtil.px2dip(dm.density, mEnvironment.getScreenHeight());
++		cWidth = mEnvironment.getScreenWidth();
++		cHeight = mEnvironment.getScreenHeight();
++	}
++	
++	@Override
++	public void requestRecieved(UDPPacket packet) {
++		// TODO Auto-generated method stub
++		ScrollControlRequest request = new ScrollControlRequest(packet);
++		
++		int controlType = request.getControlType();
++		
++		if (controlType == TypeConstants.TYPE_SCROLL){
++			int orientation = request.getmOrientation();
++			int totalLenght = request.getmTotalLenght();
++			float offset = request.getmOffset();
++			int action = request.getmAction();
++//			LOG("scroll info:"+orientation+","+totalLenght+","+offset+","+action);
++			switch (action) {
++			case MotionEvent.ACTION_DOWN:
++				mMouseX = cWidth/2;
++				mMouseY = cHeight/2;
++				break;
++				
++			case MotionEvent.ACTION_MOVE:
++				if (orientation == 0){
++					mMouseX = cWidth/2;
++					mMouseY = mMouseY + offset * (cHeight/totalLenght);				
++				} else if (orientation == 1) {
++					mMouseX = mMouseX+ offset * (cWidth/totalLenght);
++					mMouseY = cHeight/2;
++				}
++				break;
++				
++			case MotionEvent.ACTION_UP:
++				break;
++
++			default:
++				break;
++			}
++			
++			if (mMouseY < 0) mMouseY = 0;
++			if (mMouseY > cHeight) mMouseY = cHeight - 5;
++			if (mMouseX < 0) mMouseY = 0;
++			if (mMouseX > cWidth) mMouseX = cWidth - 5;
++			
++//			LOG("mouse:"+mMouseX+","+mMouseY);
++			long now = SystemClock.uptimeMillis();
++			MotionEvent e = MotionEvent.obtain(now, now, action, mMouseX, mMouseY, 0);
++			mService.injectPointerEvent(e, false);
++		}
++	}
++	
++	public void ConfigChange(){
++		if (mEnvironment != null){
++//			DisplayMetrics dm = mEnvironment.getDisplayMetrics();
++//			cWidth = DisplayUtil.px2dip(dm.density, mEnvironment.getScreenWidth());
++//			cHeight = DisplayUtil.px2dip(dm.density, mEnvironment.getScreenHeight());
++			cWidth = mEnvironment.getScreenWidth();
++			cHeight = mEnvironment.getScreenHeight();
++		}
++	}
++}
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/SensorManagerService.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/SensorManagerService.java
+new file mode 100755
+index 0000000..79388dd
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/SensorManagerService.java
+@@ -0,0 +1,157 @@
++/*******************************************************************
++* Company:     Fuzhou Rockchip Electronics Co., Ltd
++* Filename:    SensorManagerService.java  
++* Description:   
++* @author:     fxw@rock-chips.com
++* Create at:   2011-12-17 锟斤拷锟斤拷01:03:04  
++* 
++* Modification History:  
++* Date         Author      Version     Description  
++* ------------------------------------------------------------------  
++* 2011-12-17      xwf         1.0         create
++*******************************************************************/   
++
++
++package com.android.server.wm.remotecontrol;
++
++import java.util.HashMap;
++import java.util.LinkedList;
++import java.util.Map;
++import java.util.Queue;
++import java.util.Set;
++
++import android.hardware.ISensorManager;
++import android.hardware.SensorParcel;
++import android.os.RemoteException;
++import android.util.Log;
++
++/**
++  * Implement Remote Sensor 
++  */
++public class SensorManagerService extends ISensorManager.Stub {
++	private void LOG(String msg){
++		Log.d("SensorManagerService",msg);
++	}
++	private final static String TAG = "SensorManagerService";
++	private boolean isUseRemoteSensor = false;
++	private static final int MAX_WAIT_TIME = 3000;
++	private static final int MAX_QUEUE_SIZE = 15;
++	private int mQueue = 1;
++	private Map<Integer, LinkedList<SensorParcel>> sensorDataMap;
++
++	public SensorManagerService(){
++		sensorDataMap = new HashMap<Integer, LinkedList<SensorParcel>>();
++	}
++	
++	/**
++	 * Enable Remote Sensor 
++	 * Disable Remote Sensor
++	 */
++	public boolean setRemoteSensorEnabled(boolean enable){
++		isUseRemoteSensor = enable;
++		if(!enable){
++			Set<Integer> keySet = sensorDataMap.keySet();
++			for(Integer queue : keySet){
++				LinkedList<SensorParcel> sensorDataList = sensorDataMap.get(queue);
++				synchronized(sensorDataList){
++					sensorDataList.notify();
++				}
++			}
++			sensorDataMap.clear();
++		}
++		Log.d("TAG", "setRemoteSensorEnabled: "+enable);
++		return true;
++	}
++
++	public boolean getRemoteSensorEnabled(){
++		return isUseRemoteSensor;
++	}
++	
++	/**
++	 * Create Queue
++	 * @return
++	 */
++	public int createSensorQueue(){
++		synchronized(this){
++//			LOG("createSensorQueue");
++			int queue = mQueue;
++			sensorDataMap.put(queue, new LinkedList<SensorParcel>());
++			mQueue++;
++			Log.d(TAG, "Create one sensor queue, queue id is " + queue);
++			return queue;
++		}
++	}
++	
++	/**
++	 * Destroy Queue
++	 * @param queue
++	 */
++	public void destroySensorQueue(int queue){
++		synchronized(this){
++			sensorDataMap.remove(queue);
++			Log.d(TAG, "Destroy one sensor queue, queue id is " + queue);
++		}
++	}
++
++	/** 
++	 * <p>Title: injectSensorEvent</p> 
++	 * <p>Description: </p> 
++	 * @param values
++	 * @param accuracy
++	 * @param timestamp
++	 * @param sensorType
++	 * @return
++	 * @throws RemoteException 
++	 * @see android.hardware.ISensorManager#injectSensorEvent(float[], int, long, int) 
++	 */
++	public boolean injectSensorEvent(float[] values, int accuracy,
++			long timestamp, int sensorType) throws RemoteException {
++//		LOG("injectSensorEvent");
++		SensorParcel sensor = new SensorParcel();
++		sensor.values = values;
++		sensor.accuracy = accuracy;
++		sensor.timestamp = timestamp;
++		sensor.sensorType = sensorType;
++		Set<Integer> keySet = sensorDataMap.keySet();
++		for(Integer queue : keySet){
++			LinkedList<SensorParcel> sensorDataList = sensorDataMap.get(queue);
++			synchronized(sensorDataList){
++				sensorDataList.add(sensor);
++				if(sensorDataList.size()>MAX_QUEUE_SIZE){
++					sensor = sensorDataList.poll();
++				}
++				sensorDataList.notify();
++			}
++		}
++		return true;
++	}
++
++	/** 
++	 * <p>Title: obtainSensorEvent</p> 
++	 * <p>Description: </p> 
++	 * @return
++	 * @throws RemoteException 
++	 * @see android.hardware.ISensorManager#obtainSensorEvent() 
++	 */
++	public SensorParcel obtainSensorEvent(int queue) throws RemoteException {
++//		LOG("obtainSensorEvent");
++		LinkedList<SensorParcel> sensorDataList = sensorDataMap.get(queue);
++		if(sensorDataList==null){
++			if(queue>0)
++				sensorDataMap.put(queue, new LinkedList<SensorParcel>());
++			return null;	
++		}
++		
++		SensorParcel returnSensor = null;
++		synchronized(sensorDataList){
++			if(sensorDataList.isEmpty()){
++				try{
++					sensorDataList.wait(10000);
++				}catch(Exception ex){
++				}
++			}
++			returnSensor = sensorDataList.poll();
++		}
++		return returnSensor;
++	}
++}
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/SoftKeyControlRequest.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/SoftKeyControlRequest.java
+new file mode 100755
+index 0000000..eb407c0
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/SoftKeyControlRequest.java
+@@ -0,0 +1,65 @@
++package com.android.server.wm.remotecontrol;
++
++public class SoftKeyControlRequest extends RemoteControlRequest {
++	private boolean isLongPress;
++	private int mKeyCode;
++	private boolean isCapsOn;
++	
++	public SoftKeyControlRequest(){
++		setControlType(TypeConstants.TYPE_SOFTKEY);
++	}
++	
++	public SoftKeyControlRequest(UDPPacket packet){
++		super(packet);
++	}
++
++	@Override
++	protected byte[] encodeData() {
++		// TODO Auto-generated method stub
++		byte[] data = new byte[6];
++		data[0] = isLongPress ? ((byte)1) : (byte)0;
++		byte []tmp = DataTypesConvert.int2byte(mKeyCode);
++		fillData(data, tmp, 1, 4);
++		data[5] = isCapsOn ? ((byte)1) :((byte)0);
++		return data;
++	}
++
++	@Override
++	protected void decodeData(byte[] data) {
++		// TODO Auto-generated method stub
++		if(data==null||data.length!=6){
++			isBadMsg = true;
++			return;
++		}
++		isLongPress = (data[0]==1?true:false);
++		mKeyCode = DataTypesConvert.changeByteToInt(data, 1, 4);
++		isCapsOn = (data[5]==1?true:false);
++		super.decodeData(data);
++	}
++	
++	
++	public void setLongPress(boolean isLongPress){
++		this.isLongPress = isLongPress;
++	}
++	
++	public boolean isLongPress(){
++		return isLongPress;
++	}
++	
++	public void setKeyCode(int keycode){
++		mKeyCode = keycode;
++	}
++	
++	public int getKeyCode(){
++		return mKeyCode;
++	}
++
++	public boolean isCapsOn() {
++		return isCapsOn;
++	}
++
++	public void setCapsOn(boolean isCapsOn) {
++		this.isCapsOn = isCapsOn;
++	}
++	
++}
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/SoftKeyRequestListener.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/SoftKeyRequestListener.java
+new file mode 100755
+index 0000000..8bcf412
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/SoftKeyRequestListener.java
+@@ -0,0 +1,178 @@
++package com.android.server.wm.remotecontrol;
++
++import java.lang.reflect.Method;
++
++import android.content.Context;
++import android.media.AudioManager;
++import android.os.IBinder;
++import android.os.PowerManager;
++import android.os.SystemClock;
++import android.util.Log;
++import android.view.KeyEvent;
++import android.view.MotionEvent;
++import android.view.ViewConfiguration;
++import com.android.server.wm.WindowManagerService;
++
++public class SoftKeyRequestListener implements ControlSocket.RequestListener{
++	private static final String TAG = "SoftKeyRequestListener";
++	private static final boolean DEBUG = true;
++	private void LOG(String msg){
++		if (DEBUG) {
++			Log.d(TAG,msg);
++		}
++	}
++	private static final int LEFTCLICK_KEYCODE = -101;
++	private static final int CAPSLOCK_ON_KEYCODE = -49;
++	private static final int CAPSLOCK_OFF_KEYCODE = -50;
++	private static final int MUTE_KEYCODE = 91;
++	
++	private static final int TV_JOG_N_KEYCODE = 115;
++	private static final int TV_JOG_P_KEYCODE = 116;
++	
++	private static final int F1_KEYCODE = 117;
++	private static final int F2_KEYCODE = 118;
++	private static final int F3_KEYCODE = 119;
++	private static final int F4_KEYCODE = 120;
++	private static final int F5_KEYCODE = 121;
++	private static final int F6_KEYCODE = 122;
++	private static final int F7_KEYCODE = 123;
++	private static final int F8_KEYCODE = 124;
++
++	private static final int TV_MEDIA_STOP_KEYCODE = 131;
++	private static final int TV_MEDIA_MULT_FORWARD_KEYCODE = 136;
++	private static final int TV_MEDIA_MULT_BACKWARD_KEYCODE = 137;
++	private static final int TV_MEDIA_PLAY_KEYCODE = 138;
++	private static final int TV_MEDIA_PAUSE_KEYCODE = 139;
++	
++	
++	private Context mContext;
++	private WindowManagerService mService;
++	private MouseManager mMouseManager;
++	
++	public SoftKeyRequestListener(Context context,WindowManagerService service){
++		mContext = context;
++		mService = service;
++	}
++	
++	@Override
++	public void requestRecieved(UDPPacket packet) {
++		// TODO Auto-generated method stub
++		
++		SoftKeyControlRequest request = new SoftKeyControlRequest(packet);
++
++		int controlType = request.getControlType();
++		
++		if(TypeConstants.TYPE_SOFTKEY == controlType){
++			int keyCode = request.getKeyCode();
++			LOG("keycode:"+keyCode+",capsOn:"+request.isCapsOn()+" received at:"+System.currentTimeMillis());
++			keyCode = changeKeyCodeBySdkVersion(keyCode);
++			LOG("change KeyCode by sdk:"+keyCode);
++			if(handleSelfKey(mContext, keyCode)){
++				return;
++			}
++			
++			long now = SystemClock.uptimeMillis(); 
++			int metaState = 0;
++			if (request.isCapsOn()){
++				metaState = KeyEvent.META_CAPS_LOCK_ON;
++			}
++			
++			if (keyCode == KeyEvent.KEYCODE_POWER && !request.isLongPress()){
++				PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
++				if (!pm.isScreenOn()){
++					keyCode = KeyEvent.KEYCODE_NOTIFICATION;
++				}
++			}
++			KeyEvent keyDown = new KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 0, metaState);
++			
++			
++			mService.injectKeyEvent(keyDown, false);
++			KeyEvent keyUp;
++			long longPressTime = ViewConfiguration.getLongPressTimeout();
++			if(request.isLongPress()){
++				LOG("LongPress");
++				try{
++					Thread.sleep(longPressTime+100);
++				}catch (Exception e) {
++					// TODO: handle exception
++				}
++				now = SystemClock.uptimeMillis(); 
++				keyUp = new KeyEvent(now, now, KeyEvent.ACTION_UP, keyCode, 0, metaState);
++			}else {
++				now = SystemClock.uptimeMillis();
++				keyUp = new KeyEvent(now, now, KeyEvent.ACTION_UP, keyCode, 0, metaState);
++			}
++			mService.injectKeyEvent(keyUp, false);
++		}
++	}
++
++	
++	private boolean handleSelfKey(Context context, int keyCode){
++		if (keyCode < 0){
++			switch (keyCode) {
++			case LEFTCLICK_KEYCODE:
++				
++				long now = SystemClock.uptimeMillis();
++				float mouseX = mMouseManager.getMouseX();
++				float mouseY = mMouseManager.getMouseY();
++				MotionEvent down = MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN, mouseX, mouseY, 0);
++				MotionEvent up = MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, mouseX, mouseY, 0);
++				
++				mService.injectPointerEvent(down, true);
++				mService.injectPointerEvent(up, true);
++				return true;
++				
++			default:
++				break;
++			}
++		}
++		return false;
++	}
++	
++	public void setMouseManager(MouseManager mouseManager){
++		mMouseManager = mouseManager;
++	}
++	
++	private int changeKeyCodeBySdkVersion(int keycode){
++		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH){
++			switch (keycode) {
++//			case CAPSLOCK_OFF_KEYCODE:
++//			case CAPSLOCK_ON_KEYCODE:
++//				keycode = 115;
++//				return keycode;
++			
++			case F1_KEYCODE:
++			case F2_KEYCODE:
++			case F3_KEYCODE:
++			case F4_KEYCODE:
++			case F5_KEYCODE:
++			case F6_KEYCODE:
++			case F7_KEYCODE:
++			case F8_KEYCODE:
++				keycode = keycode + 14;
++				return keycode;
++				
++			case TV_MEDIA_MULT_BACKWARD_KEYCODE:
++			case TV_MEDIA_MULT_FORWARD_KEYCODE:
++			case TV_MEDIA_PAUSE_KEYCODE:
++			case TV_MEDIA_PLAY_KEYCODE:
++			case TV_MEDIA_STOP_KEYCODE:
++				keycode = keycode + 90;
++				return keycode;
++				
++			case MUTE_KEYCODE:
++				keycode = 164;
++				return keycode;
++
++			case TV_JOG_N_KEYCODE:
++			case TV_JOG_P_KEYCODE:
++				keycode = keycode + 7;
++				return keycode;
++				
++			default:
++				break;
++			}
++		}
++		return keycode;
++	}
++}
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/TypeConstants.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/TypeConstants.java
+new file mode 100755
+index 0000000..619f089
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/TypeConstants.java
+@@ -0,0 +1,51 @@
++/*******************************************************************
++* Company:     Fuzhou Rockchip Electronics Co., Ltd
++* Filename:    TypeContants.java  
++* Description:   
++* @author:     fxw@rock-chips.com
++* Create at:   2011-11-17 涓嬪崍06:07:18  
++* 
++* Modification History:  
++* Date         Author      Version     Description  
++* ------------------------------------------------------------------  
++* 2011-11-17      xwf         1.0         create
++*******************************************************************/   
++
++
++package com.android.server.wm.remotecontrol;
++
++public class TypeConstants {
++	
++	//GSENSOR COMMAND
++	public static final int TYPE_GSENSOR_COMMAND = 0x0100;
++	//GSENSOR
++	public static final int TYPE_GSENSOR = 0x0101;
++	//ENABLE GSENSOR
++	public static final int TYPE_GSENSOR_ENABLED = 0x0102;
++	//DISABLE GSENSOR
++	public static final int TYPE_GSENSOR_DISABLED = 0x0103;
++
++
++	//MOUSE COMMAND
++	public static final int TYPE_MOUSE_COMMAND = 0x0200;
++	//MOUSE
++	public static final int TYPE_MOUSE = 0x0201;
++	
++	//SOFTKEY COMMAND
++	public static final int TYPE_SOFTKEY_COMMAND = 0x0300;
++	//SOFTKEY
++	public static final int TYPE_SOFTKEY = 0x0301;
++	
++	//SCROLL COMMAND
++	public static final int TYPE_SCROLL_COMMAND = 0x0400;
++	//SCROLL
++	public static final int TYPE_SCROLL = 0x0401;
++	
++	//WIMO COMMAND
++	public static final int TYPE_WIMO_COMMAND = 0x0500;
++	public static final int TYPE_WIMO = 0x0501;
++	
++	//DEVICE CHECK COMMAND
++	public static final int TYPE_DEVICE_CHECK_COMMAND = 0x0600;
++	public static final int TYPE_DEVICE_CHECK = 0x0601;
++}
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/UDPPacket.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/UDPPacket.java
+new file mode 100755
+index 0000000..54954e9
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/UDPPacket.java
+@@ -0,0 +1,87 @@
++/*******************************************************************
++* Company:     Fuzhou Rockchip Electronics Co., Ltd
++* Filename:    UDPPacket.java  
++* Description:   
++* @author:     fxw@rock-chips.com
++* Create at:   2011-12-19 11:34:01  
++* 
++* Modification History:  
++* Date         Author      Version     Description  
++* ------------------------------------------------------------------  
++* 2011-12-19      xwf         1.0         create
++*******************************************************************/   
++
++
++package com.android.server.wm.remotecontrol;
++
++import java.net.DatagramPacket;
++import java.net.InetAddress;
++
++public class UDPPacket {
++
++	private DatagramPacket dgmPacket = null;
++	private String localAddr = "";
++	private long timeStamp;
++	private byte[] packetBytes = null;
++	
++	protected UDPPacket(){
++	}
++
++	public UDPPacket(byte[] buf, int length) {
++		dgmPacket = new DatagramPacket(buf, length);
++	}
++	
++	public void setPacket(UDPPacket packet){
++		this.dgmPacket = packet.getDatagramPacket();
++		this.localAddr = packet.getLocalAddress();
++		this.timeStamp = packet.getTimeStamp();
++		this.packetBytes = packet.getData();
++	}
++	
++	public DatagramPacket getDatagramPacket() {
++		return dgmPacket;
++	}
++	
++	public byte[] getData() {
++		if (packetBytes != null)
++			return packetBytes;
++		DatagramPacket packet = getDatagramPacket();
++		int packetLen = packet.getLength();
++		packetBytes = new byte[packetLen];
++		System.arraycopy(packet.getData(), 0, packetBytes, 0, packetLen);
++		return packetBytes;
++	}
++	
++	
++	public void setLocalAddress(String addr) {
++		localAddr = addr;
++	}
++	
++	public String getLocalAddress() {
++		return localAddr;
++	}
++	
++	public void setTimeStamp(long value) {
++		timeStamp = value;
++	}
++		
++	public long getTimeStamp() {
++		return timeStamp;
++	}
++	
++	public InetAddress getRemoteInetAddress() {
++		return getDatagramPacket().getAddress();
++	}
++	
++	public String getRemoteAddress() {
++		return getDatagramPacket().getAddress().getHostAddress();
++	}
++
++	public int getRemotePort() {
++		return getDatagramPacket().getPort();
++	}
++	
++	public String toString() {
++		return new String(getData());
++	}
++}
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/UDPSocket.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/UDPSocket.java
+new file mode 100755
+index 0000000..2c0cf03
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/UDPSocket.java
+@@ -0,0 +1,189 @@
++/*******************************************************************
++* Company:     Fuzhou Rockchip Electronics Co., Ltd
++* Filename:    UDPSocket.java  
++* Description:   
++* @author:     fxw@rock-chips.com
++* Create at:   2011-11-17 上午11:34:01  
++* 
++* Modification History:  
++* Date         Author      Version     Description  
++* ------------------------------------------------------------------  
++* 2011-11-17      xwf         1.0         create
++*******************************************************************/   
++package com.android.server.wm.remotecontrol;
++
++import java.net.DatagramPacket;
++import java.net.DatagramSocket;
++import java.net.InetAddress;
++import java.net.InetSocketAddress;
++import java.net.SocketException;
++
++import android.util.Log;
++
++
++public class UDPSocket {
++
++	private DatagramSocket udpSock = null;
++	private String localAddr = "";
++	
++	public UDPSocket() {
++		open();
++	}
++	
++	public UDPSocket(String bindAddr, int bindPort) {
++		open(bindAddr, bindPort);
++	}
++
++	public UDPSocket(int bindPort) {
++		open(bindPort);
++	}
++
++	protected void finalize() {
++		close();
++	}
++
++	public void setLocalAddress(String addr) {
++		localAddr = addr;
++	}
++	
++	public DatagramSocket getDatagramSocket() {
++		return udpSock;
++	}
++
++	public DatagramSocket getUDPSocket(){
++		return udpSock;
++	}	
++	
++	public String getLocalAddress() {
++		if (localAddr!=null&&0 < localAddr.length())
++			return localAddr;
++		if(udpSock!=null&&udpSock.getLocalAddress()!=null){
++			return udpSock.getLocalAddress().getHostAddress();
++		}else{
++			return "";
++		}
++	}
++
++	/**
++	 * 打开Socket
++	 * @return
++	 */
++	public boolean open() {
++		close();
++		try {
++			udpSock = new DatagramSocket();
++		}
++		catch (Exception e) {
++			Log.e("UDPSocket","USocket Open Error:"+e);
++			return false;
++		}
++		return true;
++	}
++	
++	/**
++	 * 打开指定地址和端口的Socket
++	 * @param bindAddr
++	 * @param bindPort
++	 * @return
++	 */
++	public boolean open(String bindAddr, int bindPort) {
++		close();
++		try {
++//			udpSock = new DatagramSocket(bindPort);
++//			udpSock.setReuseAddress(true);
++			InetSocketAddress bindSock = new InetSocketAddress(bindPort);
++			udpSock = new DatagramSocket(null);
++			udpSock.setReuseAddress(true);
++			udpSock.bind(bindSock);
++		}catch (Exception e) {
++			Log.e("UDPSocket","USocket Open Error:"+e);
++			return false;
++		}
++		setLocalAddress(bindAddr);
++		return true;
++	}
++	
++	/**
++	 * 打开指定端口socket
++	 * @param bindPort
++	 * @return
++	 */
++	public boolean open(int bindPort) {
++		close();
++		try {
++			InetSocketAddress bindSock = new InetSocketAddress(bindPort);
++			udpSock = new DatagramSocket(null);
++			udpSock.setReuseAddress(true);
++			udpSock.bind(bindSock);
++		}catch (Exception e) {
++			Log.e("UDPSocket","USocket Open Error:"+e);
++			return false;
++		}
++		return true;
++	}
++		
++	/**
++	 * 关闭Socket
++	 * @return
++	 */
++	public boolean close() {
++		if (udpSock == null)
++			return true;
++		try {
++			udpSock.close();
++			udpSock = null;
++		}
++		catch (Exception e) {
++			Log.e("UDPSocket", "USocket Close Error:"+e);
++			return false;
++		}
++		
++		return true;
++	}
++
++	/**
++	 * 发送Packet
++	 * @param addr 目的地址
++	 * @param port 目的端口
++	 * @param msg 报文内容
++	 * @return
++	 */
++	public boolean post(String addr, int port, String msg) {
++		return post(addr, port, msg.getBytes());
++	}
++	public boolean post(String addr, int port, byte[] data) {
++		 try {
++			 
++			InetAddress inetAddr = InetAddress.getByName(addr);
++			DatagramPacket dgmPacket = new DatagramPacket(data, data.length, inetAddr, port);
++			udpSock.send(dgmPacket);
++		}
++		catch (Exception e) {
++			Log.e("UDPSocket", "USocket Post Data Error:"+e);
++			return false;
++		}
++		return true;
++	}
++
++	/**
++	 * 接收数据
++	 * @return
++	 */
++	public UDPPacket receive() {
++		byte ssdvRecvBuf[] = new byte[512];
++		UDPPacket recvPacket = new UDPPacket(ssdvRecvBuf, ssdvRecvBuf.length);
++		recvPacket.setLocalAddress(getLocalAddress());
++		try {
++	 		udpSock.receive(recvPacket.getDatagramPacket());
++			recvPacket.setTimeStamp(System.currentTimeMillis());
++		}catch(SocketException e){
++			//ignore
++			return null;
++		}catch (Exception e) {
++			Log.e("UDPSocket","USocket Receive Data Error:"+e);
++			return null;
++		}
++ 		return recvPacket;
++	}
++}
++
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/WimoControlRequest.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/WimoControlRequest.java
+new file mode 100755
+index 0000000..dbfca46
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/WimoControlRequest.java
+@@ -0,0 +1,121 @@
++package com.android.server.wm.remotecontrol;
++
++import android.util.Log;
++
++public class WimoControlRequest extends RemoteControlRequest {
++	private boolean DEBUG = false;
++	private void LOG(String msg){
++		if (DEBUG)
++		Log.d("WimoControlRequest",msg);
++	}
++	public static final String URL_SCHEME = "udpwimo";
++	public static final int UNKNOWSTATE = -1;
++	public static final int CONNECTING = 0;
++	public static final int CONNECTED = 1;
++	public static final int DISCONNECT = 2;
++	public static final int HEARTALIVE = 3;
++	public static final int HEARTSTOP = 4;
++	
++	private int State;
++	private int RemotePort;
++	private int LocalPort;
++	private int versionCode;
++	
++	public WimoControlRequest(){
++		setControlType(TypeConstants.TYPE_WIMO);
++	}
++	
++	public WimoControlRequest(UDPPacket packet){
++		super(packet);
++		setRequestHost(packet.getRemoteAddress());
++	}
++	
++	@Override
++	protected byte[] encodeData() {
++		// TODO Auto-generated method stub
++		byte[] data;
++		switch (State) {
++		case CONNECTING:		
++		case DISCONNECT:
++		case HEARTALIVE:
++		case HEARTSTOP:
++			data = new byte[1];
++			data[0] = (byte)State;
++			return data;
++		
++		case CONNECTED:
++			data = new byte[10];
++			data[0] = (byte)State;
++			byte[] tmp = DataTypesConvert.changeIntToByte(LocalPort, 4);
++			fillData(data, tmp, 1, 4);
++			tmp = DataTypesConvert.changeIntToByte(RemotePort, 4);
++			fillData(data, tmp, 5, 8);
++			data[9] = (byte)versionCode;
++			return data;
++			
++		default:
++			break;
++		}
++		
++		return super.encodeData();
++	}
++	
++	@Override
++	protected void decodeData(byte[] data) {
++		// TODO Auto-generated method stub
++		State = data[0];
++		
++		switch (State) {
++		case CONNECTED:
++			byte[] tmp = fetchData(data, 1, 4);
++			LocalPort = DataTypesConvert.changeByteToInt(tmp);
++			tmp = fetchData(data, 5, 8);
++			RemotePort = DataTypesConvert.changeByteToInt(tmp);
++			versionCode = data[9]>>4;
++			break;
++			
++		case CONNECTING:
++		case DISCONNECT:
++		case HEARTALIVE:
++		case HEARTSTOP:
++			break;
++
++		default:
++			break;
++		}
++	}
++
++	public int getState() {
++		return State;
++	}
++
++	public void setState(int state) {
++		State = state;
++	}
++
++	public int getRemotePort() {
++		return RemotePort;
++	}
++
++	public void setRemotePort(int remotePort) {
++		RemotePort = remotePort;
++	}
++
++	public int getLocalPort() {
++		return LocalPort;
++	}
++
++	public void setLocalPort(int localPort) {
++		LocalPort = localPort;
++	}
++
++	public int getVersionCode() {
++		return versionCode;
++	}
++
++	public void setVersionCode(int versionCode) {
++		this.versionCode = versionCode;
++	}
++	
++	
++}
+diff --git a/frameworks/base/services/java/com/android/server/wm/remotecontrol/WimoRequestListener.java b/frameworks/base/services/java/com/android/server/wm/remotecontrol/WimoRequestListener.java
+new file mode 100755
+index 0000000..a9b734f
+--- /dev/null
++++ b/frameworks/base/services/java/com/android/server/wm/remotecontrol/WimoRequestListener.java
+@@ -0,0 +1,216 @@
++package com.android.server.wm.remotecontrol;
++
++import java.util.Timer;
++import java.util.TimerTask;
++
++import android.content.Context;
++import android.content.Intent;
++import android.util.Log;
++
++public class WimoRequestListener implements ControlSocket.RequestListener {
++
++	private void LOG(String msg){
++		Log.d("WimoRequestListener",msg);
++	}
++	
++	private Context mContext;
++	
++	private static final String RX_HOST = "rx-host";
++	private static final String RX_CMD = "rx-cmd";
++    private static final int START_WIMO_CMD = 1;
++    private static final int STOP_WIMO_CMD = 2;
++    
++    private int mState = WimoControlRequest.UNKNOWSTATE;
++    
++    public static final String ACTION_QUICK = "com.rockchip.wimo.RcConnect";
++    
++	public WimoRequestListener(Context context){
++		mContext = context;
++	}
++	
++	@Override
++	public void requestRecieved(UDPPacket packet) {
++		// TODO Auto-generated method stub
++		WimoControlRequest request = new WimoControlRequest(packet);
++		
++		if (request.getControlType() == TypeConstants.TYPE_WIMO){
++			int state = request.getState();
++			LOG("requestRecieved state:"+state);
++			Intent intent;
++			
++			switch (state) {
++			case WimoControlRequest.CONNECTING:
++				LOG("cur state:"+mState);
++//				if (mRemoteHost != null && mRemoteHost.equals(request.getRequestHost())){
++//					if (mState == WimoControlRequest.CONNECTED){
++//						return;
++//					}
++//				}
++				
++				LOG("start record service");
++				mState = WimoControlRequest.CONNECTED;
++				intent = new Intent();
++//				intent.setClassName("com.rockchip.wimo.remotecontrol", 
++//						"com.rockchip.wimo.remotecontrol.WiMoRcConnectActivity");
++				intent.setAction(ACTION_QUICK);
++				intent.addCategory(Intent.CATEGORY_DEFAULT);
++				intent.putExtra(RX_HOST, request.getRequestHost());
++				intent.putExtra(RX_CMD,START_WIMO_CMD);
++				mRemoteHost = request.getRequestHost();
++				try {
++					mContext.startService(intent);
++					StartAlive();
++				}catch (Exception e) {
++					// TODO: handle exception
++					LOG("WiMoRcConnect can't found."+e);
++				}
++
++				
++				break;
++				
++			case WimoControlRequest.CONNECTED:
++				int versionCode = request.getVersionCode();
++				String remotehost = request.getRequestHost();
++				int remotePort = request.getRemotePort();
++				int localPort = request.getLocalPort();
++				
++				@SuppressWarnings("unused")
++				String uri = WimoControlRequest.URL_SCHEME+versionCode+"://"+
++								remotehost+":"+localPort+":"+remotePort;
++				
++				break;
++				
++			case WimoControlRequest.DISCONNECT:
++				LOG("cur state:"+mState);
++				LOG("stop record service");
++				mState = state;
++				intent = new Intent();
++//				intent.setClassName("com.rockchip.wimo.remotecontrol", 
++//						"com.rockchip.wimo.remotecontrol.WiMoRcConnectActivity");
++				intent.setAction(ACTION_QUICK);
++				intent.addCategory(Intent.CATEGORY_DEFAULT);
++				intent.putExtra(RX_HOST, request.getRequestHost());
++				intent.putExtra(RX_CMD,STOP_WIMO_CMD);
++				try {
++					mContext.startService(intent);
++				}catch (Exception e) {
++					// TODO: handle exception
++					LOG("WiMoRcConnect can't found."+e);
++				}
++				break;
++				
++			case WimoControlRequest.HEARTALIVE:
++				if (mRemoteHost != null	&& mRemoteHost.equals(request.getRequestHost()))
++					UpdateAliveTime();
++				break;
++			
++			case WimoControlRequest.HEARTSTOP:
++				if (mRemoteHost != null && mRemoteHost.equals(request.getRequestHost()))
++					StopAliver();
++				break;
++				
++				
++			default:
++				break;
++			}
++		}
++	}
++	
++	private final int HEART_TIME_OUT = 30000;
++	private final int HEART_CYLE = 3000;
++	private long mPreAliveTime;
++	private Timer mHeartTimer;
++	private Timer mCheckTimer;
++	private String mRemoteHost;
++	private WimoControlRequest mWimoControlRequest;
++	
++	public void StartAlive(){
++		StopAliver();
++		LOG("start heart alive");
++//		mHeartTimer = new Timer();
++//		TimerTask heartTask = new TimerTask() {
++//			
++//			@Override
++//			public void run() {
++//				// TODO Auto-generated method stub
++//				if (mRemoteHost == null) {
++//					StopAliver();
++//					return;
++//				}
++//				LOG("post heart packet");
++//				mWimoControlRequest = new WimoControlRequest();
++//				mWimoControlRequest.setRequestHost(mRemoteHost);
++//				
++//				mWimoControlRequest.setState(WimoControlRequest.HEARTALIVE);
++//				mWimoControlRequest.post(RemoteControlRequest.REMOTE_CONTROL_PORT);
++//			}
++//		};
++//		
++//		mHeartTimer.schedule(heartTask, HEART_CYLE/3, HEART_CYLE);
++		
++		mCheckTimer = new Timer();
++		mPreAliveTime = System.currentTimeMillis();
++		TimerTask checkTask = new TimerTask() {
++			
++			@Override
++			public void run() {
++				// TODO Auto-generated method stub
++				if (mRemoteHost != null){
++					long nowMills = System.currentTimeMillis()/1000*1000;
++					long prevMills = mPreAliveTime/1000*1000;
++					LOG("heart time period:"+(nowMills-prevMills));
++					if((nowMills-prevMills)> HEART_TIME_OUT){
++						LOG("stop record service");
++						mState = WimoControlRequest.DISCONNECT;
++						Intent intent = new Intent();
++						intent.setAction(ACTION_QUICK);
++						intent.addCategory(Intent.CATEGORY_DEFAULT);
++						intent.putExtra(RX_HOST, mRemoteHost);
++						intent.putExtra(RX_CMD,STOP_WIMO_CMD);
++						try {
++							mContext.startService(intent);
++							StopAliver();
++						}catch (Exception e) {
++							// TODO: handle exception
++							LOG("WiMoRcConnect can't found."+e);
++						}
++					} else {
++						LOG("post heart packet");
++						mWimoControlRequest = new WimoControlRequest();
++						mWimoControlRequest.setRequestHost(mRemoteHost);
++						
++						mWimoControlRequest.setState(WimoControlRequest.HEARTALIVE);
++						mWimoControlRequest.post(RemoteControlRequest.REMOTE_CONTROL_PORT);
++					}
++						
++				}else {
++					StopAliver();
++				}
++			}
++		};
++		
++		mCheckTimer.schedule(checkTask, HEART_CYLE/2, HEART_CYLE);
++	}
++	
++	public void StopAliver(){
++		LOG("stop heart alive");
++		if(mHeartTimer!=null){
++			mHeartTimer.cancel();
++			mHeartTimer = null;
++		}
++		if(mCheckTimer!=null){
++			mCheckTimer.cancel();
++			mCheckTimer = null;
++		}
++		
++		if (mWimoControlRequest != null) {
++			mWimoControlRequest.close();
++		}
++
++	}
++	
++	public void UpdateAliveTime(){
++		mPreAliveTime = System.currentTimeMillis();
++	}
++
++}
+diff --git a/frameworks/base/tools/layoutlib/bridge/src/com/android/layoutlib/bridge/android/BridgeWindowManager.java b/frameworks/base/tools/layoutlib/bridge/src/com/android/layoutlib/bridge/android/BridgeWindowManager.java
+index e9be9b2..437d48c 100644
+--- a/frameworks/base/tools/layoutlib/bridge/src/com/android/layoutlib/bridge/android/BridgeWindowManager.java
++++ b/frameworks/base/tools/layoutlib/bridge/src/com/android/layoutlib/bridge/android/BridgeWindowManager.java
+@@ -1,3 +1,4 @@
++/*$_FOR_ROCKCHIP_RBOX_$*/
+ /*
+  * Copyright (C) 2011 The Android Open Source Project
+  *
+@@ -23,6 +24,7 @@ import android.content.res.CompatibilityInfo;
+ import android.content.res.Configuration;
+ import android.graphics.Bitmap;
+ import android.graphics.Point;
++import android.hardware.ISensorManager;
+ import android.os.IBinder;
+ import android.os.IRemoteCallback;
+ import android.os.RemoteException;
+@@ -90,16 +92,27 @@ public class BridgeWindowManager implements IWindowManager {
+     }
+ 
+     // ---- unused implementation of IWindowManager ----
++	/*$_rbox_$_modify_$_zhangwen_20120808: implement the function  dispatchMouse() of  IWindowManager*/
++	//$_rbox_$_modify_$_begin
+ 	public void dispatchMouse(float x,float y,int w,int h){
+ 
+ 	}
++	//$_rbox_$_modify_$_end
+ 
++	/*$_rbox_$_modify_$_zhangwen_20120808: implement the function  dispatchMousebyCd() of  IWindowManager*/
++	//$_rbox_$_modify_$_begin
+ 	public void dispatchMousebyCd(float x,float y){
+ 
+ 	}
+-
+-    
+-
++	//$_rbox_$_modify_$_end
++	
++    /*$_rbox_$_modify_$_cx_20121008 */
++    //$_rbox_$_modify_$_begin
++    public ISensorManager getRemoteSensorManager(){
++   		return null;
++    }
++    //$_rbox_$_modify_$_end
++	
+ 	@Override
+     public boolean hasSystemNavBar() throws RemoteException {
+         // TODO Auto-generated method stub
